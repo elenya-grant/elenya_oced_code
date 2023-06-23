@@ -1,0 +1,28 @@
+﻿Variable,Value
+Turbine Rating,6
+Rotor Diameter,196
+Hub Height,115
+2020 CapEx,1420
+2025 CapEx,1210
+2030 CapEx,1000
+2035 CapEx,985.5
+2050 CapEx,942
+CapEx Multiplier,1
+2020 OpEx ($/kw-yr),43
+2025 OpEx ($/kw-yr),38.69
+2030 OpEx ($/kw-yr),34.38
+2035 OpEx ($/kw-yr),31.8015
+2050 OpEx ($/kw-yr),24.066
+FCR (all years),0.49
+2020 PV base installed cost,1391
+2025 PV base installed cost,1014.315
+2030 PV base installed cost,637.63
+2035 PV base installed cost,598.42
+2050 PV base installed cost,480.79
+PV Capex Multiplier,1
+2020 PV OpEx,22.62
+2025 PV OpEx,17.935
+2030 PV OpEx,13.25
+2035 PV OpEx,12.6525
+2050 PV OpEx,10.86
+PV FCR (all years),0.44
