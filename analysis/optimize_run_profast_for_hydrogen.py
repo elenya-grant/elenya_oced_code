@@ -9,12 +9,12 @@ import sys
 #sys.path.insert(1,'../PyFAST/')
 import numpy as np
 import pandas as pd
-sys.path.insert(1,sys.path[0] + '/ProFAST-main/') #ESG
-#HI! Add path to your profast directory!
+# sys.path.insert(1,sys.path[0] + '/ProFAST-main/') #ESG
+sys.path.insert(1,'/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/') #ESG
 import ProFAST
 
 #from analysis.LCA_single_scenario_ProFAST import hydrogen_LCA_singlescenario_ProFAST
-#^only need that for grid connected cases
+
 #sys.path.append('../ProFAST/')
 
 pf = ProFAST.ProFAST()
@@ -37,6 +37,8 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     #desal_sys_size=electrolyzer_size_mw * (10/55.5)
     opex_desal = 1340.6880555555556*electrolyzer_size_mw * (10/55.5)
     capex_desal =9109.810555555556*electrolyzer_size_mw * (10/55.5)
+
+    
 
     
     electrolyzer_efficiency_while_running = []
@@ -67,6 +69,7 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     
     # Installed capital cost
     
+    
     # Indirect capital cost as a percentage of installed capital cost
     site_prep = 2/100   #[%]
     engineering_design = 10/100 #[%]
@@ -76,7 +79,7 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     
     
     # Calculate electrolyzer installation cost
-    #NOTE: this is now the input :)
+    #NOTE: this is the input given by OCED
     #total_direct_electrolyzer_cost_kw = (electrolyzer_system_capex_kw * (1+electrolyzer_installation_factor)) \
     
     electrolyzer_total_installed_capex = total_direct_electrolyzer_cost_kw*electrolyzer_size_mw*1000
@@ -108,13 +111,12 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     electrolyzer_refurbishment_schedule[refturb_period:plant_life:refturb_period]=stack_replacement_cost
     
 
-    #NOTE: add below in if using policy for H2 (like H2_PTC)
+    #NOTE: add below in if using policy!
     # electrolysis_total_EI_policy_grid=0
     # electrolysis_total_EI_policy_offgrid=0
     # electrolysis_total_EI_policy_grid,electrolysis_total_EI_policy_offgrid\
     #       = hydrogen_LCA_singlescenario_ProFAST(cambiumdata_filepath,grid_connection_scenario,H2_Results['hydrogen_annual_output'],energy_from_grid_kWh,plant_life)
     
-    #Note: Assuming that we're only using 
     grid_electricity_useage_kWhpkg = 0 #np.sum(energy_from_grid_kWh)/H2_Results['hydrogen_annual_output']
     ren_electricity_useage_kWhpkg =np.sum(energy_from_renewables_kWh)/H2_Results['hydrogen_annual_output']
     # ren_frac = 1#np.min([1,np.sum(energy_from_renewables_kWh)/np.sum(energy_to_electrolyzer)])
@@ -144,6 +146,11 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     battery_capex_per_kw= renewable_plant_cost_info['battery']['capex_per_kwh']*battery_hrs +  renewable_plant_cost_info['battery']['capex_per_kw']
     capex_battery_installed = battery_capex_per_kw * battery_size_mw*1000
     fixed_cost_battery = renewable_plant_cost_info['battery']['o&m_percent'] * capex_battery_installed
+
+    
+
+    #capex_wind_installed=capex_wind_installed_init-wind_revised_cost
+    
     
     H2_PTC_duration = 10 # years the tax credit is active
     Ren_PTC_duration = 10 # years the tax credit is active
@@ -157,8 +164,7 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     elif policy_option == 'max':
         
         ITC = 0.5
-        H2_PTC = 0 #assuming we don't have hydrogen PTC
-        #would need to have LCA single scenario called for that!
+        H2_PTC = 0 #for OPED analysis
         
         # if electrolysis_total_EI_policy <= 0.45: # kg CO2e/kg H2
         #     H2_PTC = 3 # $/kg H2
@@ -353,4 +359,14 @@ def opt_run_profast_for_hydrogen(total_direct_electrolyzer_cost_kw,\
     # pd.Series(dict(zip(summary['Name'],summary['Amount']))).to_pickle(filepath + 'summary_noITC_noH2PTC')
     # price_breakdown.to_pickle(filepath + 'pricebreakdown_noITC_noH2PTC')
     # return(sol,summary,price_breakdown,lcoh_breakdown)#,extra_outputs)
-    return(sol,summary,price_breakdown,lcoh_breakdown)
+    # return(sol,summary,price_breakdown,lcoh_breakdown)
+    capex_df_keys = ['Electrolysis system [$]','Compression [$]','Hydrogen Storage [$]','Desalination [$]','Wind Plant [$]','Solar Plant [$]','Battery [$]']
+    capex_df_vals=[price_breakdown.loc[price_breakdown['Name']=='Electrolysis system','NPV'].tolist()[0],\
+                    price_breakdown.loc[price_breakdown['Name']=='Compression','NPV'].tolist()[0],\
+                    price_breakdown.loc[price_breakdown['Name']=='Hydrogen Storage','NPV'].tolist()[0],\
+                    price_breakdown.loc[price_breakdown['Name']=='Desalination','NPV'].tolist()[0],\
+                    price_breakdown.loc[price_breakdown['Name']=='Wind Plant','NPV'].tolist()[0],\
+                    price_breakdown.loc[price_breakdown['Name']=='Solar Plant','NPV'].tolist()[0],\
+                    price_breakdown.loc[price_breakdown['Name']=='Battery Storage','NPV'].tolist()[0]]
+    capex_df = pd.Series(dict(zip(capex_df_keys,capex_df_vals)))
+    return(sol,lcoh_breakdown,capex_df)
