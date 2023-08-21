@@ -123,7 +123,7 @@ class run_PEM_clusters:
         h2_df_tot = pd.DataFrame()
 
         col_names = []
-        # start = time.perf_counter()
+        start = time.perf_counter()
         for ci, cluster in enumerate(clusters):
             cl_name = "Cluster #{}".format(ci)
             col_names.append(cl_name)
@@ -149,12 +149,64 @@ class run_PEM_clusters:
                 h2_df_ts = h2_df_ts.join(h2_ts_temp)
                 h2_df_ts.columns = col_names
 
-        # end = time.perf_counter()
+        end = time.perf_counter()
         self.clusters = clusters
-        # print("Took {} sec to run the RUN function".format(round(end - start, 3)))
+        print("Took {} sec to run the RUN function".format(round(end - start, 3)))
         return h2_df_ts, h2_df_tot
         # return h2_dict_ts, h2_df_tot
+    def run_quick(self, optimize=False):
+        h2_pr_hr = np.zeros(len(self.input_power_kw))
+        h2_ts_key='hydrogen_hourly_production'
+        h2_tot_key = 'Life'
+        
+        # TODO: add control type as input!
+        clusters = self.create_clusters()  # initialize clusters
+        if optimize:
+            power_to_clusters = self.optimize_power_split()  # run Sanjana's code
+        else:
+            power_to_clusters = self.even_split_power()
+        # h2_df_ts = pd.DataFrame()
+        h2_df_tot = pd.DataFrame()
 
+        col_names = []
+        # start = time.perf_counter()
+        for ci, cluster in enumerate(clusters):
+            cl_name = "Cluster #{}".format(ci)
+            col_names.append(cl_name)
+            h2_ts, h2_tot = clusters[ci].run(power_to_clusters[ci])
+            # h2_dict_ts['Cluster #{}'.format(ci)] = h2_ts
+            h2_pr_hr+=h2_ts[h2_ts_key]
+            # h2_ts_temp = pd.Series(h2_ts[h2_ts_key], name=cl_name)
+            # h2_tot_temp = pd.Series(h2_tot[h2_tot_key], name=cl_name)
+            h2_tot_temp =h2_tot[h2_tot_key].iloc[0].loc['full losses']
+            h2_tot_temp.name = cl_name
+            # h2_tot[h2_tot_key].index=[cl_name]
+            # h2_tot_temp = h2_tot[h2_tot_key]
+            # h2_tot[h2_tot_key].iloc[0].loc['full losses']
+            #pd.Series(h2_tot[h2_tot_key], index=[cl_name])
+            # if len(h2_df_tot) == 0:
+                # h2_df_ts=pd.concat([h2_df_ts,h2_ts_temp],axis=0,ignore_index=False)
+            # h2_df_tot = pd.concat(
+            #     [h2_df_tot, h2_tot_temp], axis=1, ignore_index=False
+            # )
+            h2_df_tot = pd.concat(
+                [h2_df_tot, h2_tot_temp],axis=1)
+            # h2_df_tot.index = col_names
+
+                # h2_df_ts = pd.concat([h2_df_ts, h2_ts_temp], axis=0, ignore_index=False)
+                # h2_df_ts.columns = col_names
+            # else:
+            #     # h2_df_ts = h2_df_ts.join(h2_ts_temp)
+            #     h2_df_tot = h2_df_tot.join(h2_tot_temp)
+            #     h2_df_tot.index = col_names
+
+                # h2_df_ts = h2_df_ts.join(h2_ts_temp)
+                # h2_df_ts.columns = col_names
+
+        # end = time.perf_counter()
+        # self.clusters = clusters
+        # print("Took {} sec to run the RUN function".format(round(end - start, 3)))
+        return h2_pr_hr, h2_df_tot
     def optimize_power_split(self):
         number_of_stacks = self.num_clusters  
         rated_power = self.cluster_cap_mw * 1000
