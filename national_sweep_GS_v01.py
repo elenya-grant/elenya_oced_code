@@ -192,6 +192,7 @@ class opt_national_sweep:
         #finalize and save
         base_filename = '{}_{}-{}'.format(site_info['latitude'],site_info['longitude'],site_info['state'])
         optimal_sizes.update(H2_res)
+        optimal_sizes.update(site_info)
         ts_keys = ['Wind [kWh]','Solar [kWh]','Energy From Renewables [kWh]','Energy to Electrolyzer [kWh]','Hydrogen Hourly Production [kg/hour]']
         ts_vals = [wind_gen_kWh,solar_gen_kWh,energy_from_renewables,electrical_power_input_kWh,hydrogen_hourly_production]
         #save time series
