@@ -1,0 +1,93 @@
+2030:
+    Advanced:
+        wind:
+            capex_per_kw: 1096 #[$/kW]
+            o&m_per_kw: 24 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 917 #[$/kW]
+            o&m_per_kw: 16 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 171 #[$/kW]
+            capex_per_kwh: 184 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 170
+    Moderate:
+        wind:
+            capex_per_kw: 1150 #[$/kW]
+            o&m_per_kw: 27 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 1038 #[$/kW]
+            o&m_per_kw: 18 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 294 #[$/kW]
+            capex_per_kwh: 227 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 340
+    Conservative:
+        wind:
+            capex_per_kw: 1274 #[$/kW]
+            o&m_per_kw: 29 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 1206 #[$/kW]
+            o&m_per_kw: 20 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 313 #[$/kW]
+            capex_per_kwh: 295 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 453
+
+2031:
+    Advanced:
+        wind:
+            capex_per_kw: 1084 #[$/kW]
+            o&m_per_kw: 23 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 860 #[$/kW]
+            o&m_per_kw: 16 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 167 #[$/kW]
+            capex_per_kwh: 181 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 170
+    Moderate:
+        wind:
+            capex_per_kw: 1139 #[$/kW]
+            o&m_per_kw: 27 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 997 #[$/kW]
+            o&m_per_kw: 17 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 292 #[$/kW]
+            capex_per_kwh: 227 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 340
+    Conservative:
+        wind:
+            capex_per_kw: 1265 #[$/kW]
+            o&m_per_kw: 29 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 1185 #[$/kW]
+            o&m_per_kw: 20 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 311 #[$/kW]
+            capex_per_kwh: 293 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 453

@@ -1,0 +1,197 @@
+simulation:
+    desc: 'GS_PEMP_MVP_v01'
+    # cost_year: 2030
+    n_sites: 50535
+    site_list_filename: 'bespoke_sitelist_50535_locations.csv' #'wtk_site_metadata_104k_sites_pemp.csv'
+    policy_cases:
+        - 'no_policy' #'no policy'
+        - 'max_policy' #'max'
+    storage_types:
+        - 'salt_cavern' #'Salt Cavern'
+        - 'buried_pipes' #'Buried pipes'
+    re_cost_year_scenario: 2031 #'year_2031'
+    elec_cost_year_scenario: 2030
+    cost_scenarios: 
+        - 'Advanced'
+        - 'Conservative'
+        - 'Moderate'
+plant_general:
+    resource_year: 2013
+    plant_life: 30
+    cost_year: 2031 #only 2030 or 2031
+    start_year: 2032
+    installation_months: 36
+    grid_connection_scenario: 'off-grid'
+    electrolysis_scale: 'Centralized'
+    hydrogen_production_capacity_required_kgphr: 1000 #unused if off-grid
+    
+    
+#ATB2023_RECosts.yaml
+#HydrogenStorage_Costs.yaml
+#Policy_Defaults.yaml
+renewable_cost_cases: !include ATB2023_RECosts.yaml
+hydrogen_storage_cases: !include HydrogenStorage_Costs.yaml
+policy_cases: !include Policy_Defaults.yaml
+# electrolyzer_cost_cases: !include ElectrolyzerCostParameters.yaml
+turbine:
+    config:
+        # desc: 'default_6MW'
+        name: 'lbw_6MW'
+        floris: False
+        turb_rating_mw: 6 #[MW]
+        sim_default_losses: 12.83 #[%]
+    constraints:
+        min_nTurbs: 1
+        max_nTurbs: 300
+        ref_nTurbs: 150
+
+solar:
+    config:
+        desc: 'single_axis_default'
+        dc_ac_ratio: 1.3
+        sim_default_losses: 20
+        # ref_size_mw: 100 #MWdc
+        panel_rating_MW: 5
+    constraints:
+        min_size_MW: 5
+        max_size_MW: 1000
+        ref_size_MW: 500
+battery:
+    config:
+        desc: 'simple_dispatch'
+        unit_charge_rate_MW: 5
+    constraints:
+        min_nHours: 0.1
+        max_nHours: 4
+        max_chargeRate_MW: 100
+        min_chargeRate_MW: 0.001
+
+
+electrolyzer:
+    config:
+        # stack_size_MW: 10
+        stack_size_MW: 10
+        EOL_eff_drop: 10 #[%]
+        use_degradation_penalty: True
+        kg_H20_pr_kg_H2: 10
+        pem_control_type: 'basic'
+    # cost_params:
+    #     stack_replacement_cost: 0.15 #[% of installed CapEx]
+    #     # compressor_CapEx_USD_pr_kW: 39
+    #     FOM_USD_pr_kW: 12.8 #[$/kW-year]
+    #     VOM_USD_pr_MWh: 1.3 #[$/MWh]
+    #     electrolyzer_installation_factor: 0.12
+    #     CapEx_USD_pr_kW: [] #[$/kW]
+    #TODO: make these constraints based on size, not number of stacks
+    constraints:
+        min_nStacks: 1
+        max_nStacks: 180 #45 ->should equal 1800 MW
+        ref_nStacks: 100 #25 -> should eqal 1 GW
+finance_parameters:
+    land_cost: 250000 #[$]
+    general_inflation: 0.0
+    # property_tax_insurance: 0.015 #[% of Cap/y]
+    discount_rate: 0.0824
+    income_tax_rate: 0.27
+    capital_gain_tax_rate: 0.15
+    debt_equity_split: 68.5
+    property_tax: 0.01
+    property_insurance: 0.005
+
+    total_income_tax_rate: 0.27
+    capital_gains_tax_rate: 0.15
+    debt_interest_rate: 0.0489
+
+    sales_tax_rate: 0.0 
+    cash_onhand_months: 1
+
+    debt_type: "Revolving debt" #ADD
+    depreciation_method: "MACRS" #ADD
+
+    depreciation_period: 7 # years -> ADD IN
+    administrative_expense_percent_of_sales: 0
+    depreciation_period_electrolyzer: 7 #Maybe add
+# project_parameters:
+#     start_year: []
+#     installation_months: 36
+cost_info:
+    # general:
+    #     start_year: 2022
+    #     installation_months: 36
+
+    # same_for_nation:
+    #     land_cost_USD: 250000 #[$]
+    water_cost_USD_pr_gal: 0.004 #$/gal
+
+    
+    electrolyzer:
+        electrolysis_cost_params:
+            #capex included in ATB2023_RECosts
+            # CapEx_USD_pr_kW: 204 #[$/kW] - UPDATE
+            stack_replacement_cost: 0.15 #[% of installed CapEx]
+            # compressor_CapEx_USD_pr_kW: 39
+            FOM_USD_pr_kW: 12.8 #[$/kW-year]
+            VOM_USD_pr_MWh: 1.3 #[$/MWh]
+            electrolyzer_installation_factor: 0.12
+        
+        indirect_CapEx_Costs: #add later?
+            site_prep: 0.02
+            engineering_design: 0.1
+            project_contingency: 0.15
+            permitting: 0.15
+        desal_cost_params:
+            desal_CapEx_USD_pr_kg_pr_sec: 32894 #[$/(kg/sec)]
+            desal_OpEx_USD_pr_kg_pr_sec: 4841 #[$/(kg/sec)-year]
+            water_density_kg_pr_m3: 997 #kg/m^3
+            # desal_eff_kWh_pr_m3: 4.2 #kWh/m^3 H2O
+optimization: #these aren't included yet
+    optimization_type: 'simple_param'
+    #other options are 'simple_gradient' and 'pyomo_opt'
+    optimziation_policy_cases: 
+        - 'no_policy'
+    optimization_cost_cases:
+        - 'Moderate'
+    optimize_for_LCOH_with_Storage: False #not included yet
+    storage_type_for_optimization: 'buried_pipes' #only used if storage_type_for_optimization is True
+outputs:
+    save_sweep_results: True
+    save_output_dir: ''
+     
+    
+
+
+# cost_general:
+#     water_cost: 0.004 #$/gal #move somewhere else?
+#     land_cost_USD: 250000 #[$]
+#     installation_months: 36
+#     plant_life: 30
+#     start_year: 2022
+#     gen_inflation: 0.0
+#     property_tax_insurance: 0.015 #[% of Cap/y]
+#     after_tax_nominal_DR: 0.0824
+#     income_tax_rate: 0.27
+#     capital_gain_tax_rate: 0.15
+#     debt_equity_ratio_of_initial_financing: 1.38
+#     debt_interest_rate: 0.0489
+#     indirect_CapEx_Costs: #add later?
+#         site_prep: 0.02
+#         engineering_design: 0.1
+#         project_contingency: 0.15
+#         permitting: 0.15
+#wind solar and battery costs from: https://data.openei.org/submissions/5716
+#2022 v3 Annual Technology Baselone Workbook Mid-year update 2-15-2023.xlsx
+#citation below:
+#National Renewable Energy Laboratory (NREL). (2022).
+#2022 Annual Technology Baseline (ATB) Cost and
+#Performance Data for Electricity Generation Technologies [data set].
+# Retrieved from https://dx.doi.org/10.25984/1871952.
+
+#https://data.openei.org/submissions/5865
+#2023_v2_Workbook_07_20_23.xlsx
+#National Renewable Energy Laboratory (NREL). (2023). 
+#2023 Annual Technology Baseline (ATB) Cost and Performance Data
+#for Electricity Generation Technologies [data set].  
+#Retrieved from https://dx.doi.org/10.25984/1987306.
+#
+#
+#

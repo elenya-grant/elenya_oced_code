@@ -1,0 +1,25 @@
+
+H2_PTC_duration: 10 # years
+Ren_PTC_duration: 10 # years
+# use_solar_ITC: False
+no_policy:
+    desc: 'none'
+    use_solar_ITC: False
+    use_solar_PTC: False
+    Ren_PTC_mult: 0
+    itc: 0
+    h2_ptc: 0
+
+# max_policy:
+#     desc: 'max'
+#     Ren_PTC_mult: 0.03072 #[$/kWh]
+#     itc: 0.5
+#     h2_ptc: 3 #[$/kg-H2]
+
+max_policy:
+    desc: 'max'
+    use_solar_ITC: True
+    use_solar_PTC: False
+    Ren_PTC_mult: 0.03072
+    itc: 0.5
+    h2_ptc: 3

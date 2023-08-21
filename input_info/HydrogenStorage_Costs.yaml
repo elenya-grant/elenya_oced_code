@@ -1,0 +1,28 @@
+
+equation_year_CEPCI: 603.1
+model_year_CEPCI: 607.5
+compressor_CapEx_USD_pr_kW: 39
+compressor_OpEx_USD_pr_kW: 0 #TODO - update!
+
+buried_pipes:
+    desc: 'Buried Pipes'
+    base_capacity_MWh_HHV: 4085
+    base_capacity_kg: 103650.973
+    base_cost_USD_pr_kg:  521.34
+    scaling_factor: 0.9592
+    opex_per_kg: 0 #TODO - update! 84
+
+salt_cavern:
+    desc: 'Salt Cavern'
+    base_capacity_MWh_HHV: 120293
+    base_capacity_kg: 3052261.065689
+    base_cost_USD_pr_kg: 17.04
+    scaling_factor: 0.611
+    opex_per_kg: 0 #TODO - update!
+
+#https://www.sciencedirect.com/science/article/pii/S0360319921030834
+#Table 2: buried pipe maintenance cost of 173162 $/year for 500 tonnes of storage capacity
+# -> which is 0.35 $/kg-H2-stored
+# -> labor costs are about 0.5 $/kg-H2 stored
+#other costs tho ... are labor cost, compressor cost (?), pipes n vals, 
+#Table 7 has salt cavern capex breakdown - says compressor is 5$/kg of h2-stored
