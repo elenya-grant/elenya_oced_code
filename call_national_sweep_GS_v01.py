@@ -45,22 +45,24 @@ warnings.filterwarnings("ignore")
 # version = 'v01b'
 # version = 'GS_v01'
 parent_path = os.path.abspath('') + '/'
-run_desc = 'sweep' #or optimize
+# run_desc = 'sweep' #or optimize
 
 input_file_name = 'model_inputs.yaml'
 filename = parent_path + 'input_info/' + input_file_name
 config = load_yaml(filename)
+run_desc = '{}_'.format(int(config['simulation']['re_cost_year_scenario'])) + config['optimization']['optimization_type']
 
 pf_init = init_profast(config)
 version =config['simulation']['desc']
 num_sites_to_run = config['simulation']['n_sites']
 
 
-result_subdir = '{}_{}_{}k'.format(version,run_desc,int(num_sites_to_run/1000))
-if run_desc=='sweep':
+# result_subdir = '{}_{}_{}k'.format(version,run_desc,int(num_sites_to_run/1000))
+result_subdir = '{}_{}_{}sites'.format(version,run_desc,int(num_sites_to_run))
+if run_desc=='simple_param':
     subsubdirectories = ['lcoh_results','sweep_results'] #do not modify for parametric sweep
 else:
-    #TODO: fix this!
+    #TODO: update this!
     subsubdirectories = ['lcoh_results','sweep_results'] 
 
 #Specify results folder
@@ -71,6 +73,8 @@ if len(config['outputs']['save_output_dir']) == 0:
 else:
     result_main_path= config['outputs']['save_output_dir']
 results_main_directory = result_main_path + result_subdir + '/'
+print('results will be saved to this location:')
+print(results_main_directory)
 config['outputs']['save_output_dir']= result_main_path + result_subdir + '/'
 if not os.path.isdir(results_main_directory):
     os.makedirs(results_main_directory)
@@ -88,7 +92,8 @@ else:
     site_idx = np.array(site_list.index.values)
 for i,si in enumerate(site_idx):
     
-    site_desc = '{}_ID{}'.format(site_list.iloc[si]['State'].replace(' ',''),site_list.iloc[si]['site_id'])
+    # site_desc = '{}_ID{}'.format(site_list.iloc[si]['state'].replace(' ',''),site_list.iloc[si]['site_id'])
+    # site_desc = '{}_Num{}'.format(site_list.iloc[si]['state'].replace(' ',''),site_list.iloc[si].name)
     site_info = {'latitude':site_list.iloc[si]['latitude'],'longitude':site_list.iloc[si]['longitude'],'state':site_list.iloc[si]['state'].replace(' ','')}
     opt.run_site_outline(site_info,config)
     stop
