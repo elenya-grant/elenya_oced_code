@@ -77,7 +77,7 @@ def estimate_lcoh(S_wind,S_elec):
 def run_quick_lcoh(elec_eff,elec_cf,annual_h2,avg_stack_life_hrs,component_sizes,pf_param,pf_tool,return_details=False):
     component_sizes
     sol,summary,price_breakdown,lcoh_breakdown = \
-        pf_tool.run_lcoh_nostorage(pf_param,component_sizes,elec_eff,elec_cf,annual_h2,avg_stack_life_hrs)
+        pf_tool.run_lcoh_nostorage(pf_param,component_sizes,elec_eff,elec_cf,annual_h2,avg_stack_life_hrs,wind_frac=1)
     print('LCOH: {}'.format(sol['price']))
     if return_details:
         return [sol["price"],lcoh_breakdown]
