@@ -9,7 +9,7 @@ simulation:
     storage_types:
         - 'salt_cavern' #'Salt Cavern'
         - 'buried_pipes' #'Buried pipes'
-    re_cost_year_scenario: 2031 #'year_2031'
+    re_cost_year_scenario: 2030 #'year_2031'
     elec_cost_year_scenario: 2030
     cost_scenarios: 
         - 'Advanced'
