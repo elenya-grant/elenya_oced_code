@@ -13,8 +13,8 @@ simulation:
     elec_cost_year_scenario: 2030
     cost_scenarios: 
         - 'Advanced'
-        - 'Conservative'
         - 'Moderate'
+        - 'Conservative'
 plant_general:
     resource_year: 2013
     plant_life: 30
