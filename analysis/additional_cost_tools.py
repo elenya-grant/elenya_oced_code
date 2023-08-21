@@ -123,14 +123,7 @@ def hydrogen_storage_capacity_auto_calc(H2_Results):
             hydrogen_storage_soc.append(hydrogen_storage_soc[j-1]+hydrogen_surplus_deficit[j])
             
     hydrogen_storage_capacity_kg = np.max(hydrogen_storage_soc) - np.min(hydrogen_storage_soc)
-    # h2_LHV = 119.96
-    # h2_HHV = 141.88
-    # hydrogen_storage_capacity_MWh_LHV = hydrogen_storage_capacity_kg*h2_LHV/3600
-    # hydrogen_storage_capacity_MWh_HHV = hydrogen_storage_capacity_kg*h2_HHV/3600
-             
-    # hydrogen_storage_duration_hr = hydrogen_storage_capacity_MWh_LHV/electrolyzer_size_mw/H2_Results['electrolyzer_total_efficiency']
-    # hydrogen_storage_duration_hr = hydrogen_storage_capacity_MWh_LHV/electrolyzer_size_mw/H2_Results['electrolyzer_avg_efficiency']
-
+    
     return hydrogen_storage_capacity_kg
 def hydrogen_storage_capacity_auto_calc_NEW(H2_Results,electrolyzer_size_mw):
 

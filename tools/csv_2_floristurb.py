@@ -18,6 +18,12 @@ class floris_from_csv:
             self.turbine_rating_mw = 6
             self.tower_height = 115
             self.tsr=7.9
+
+        elif '2023NREL_Bespoke_6MW' in turbine_name:
+            self.rotor_diameter = 196
+            self.turbine_rating_mw = 6
+            self.tower_height = 194
+            self.tsr=7.9 #i'm not sure
     def load_reference_floris_turb(self):
         ref_config_filename = 'turbine_reference.yaml'
         filename = self.turb_dir + ref_config_filename
