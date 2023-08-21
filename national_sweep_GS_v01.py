@@ -15,12 +15,12 @@ from analysis.GS_v01_PF_for_H2 import LCOH_Calc
 from analysis.GS_v01_set_PF_params import init_profast
 # from analysis.GS_v01_PF_for_H2_Storage import LCOH_Calc
 from analysis.PEM_H2_LT_electrolyzer_Clusters import PEM_H2_Clusters
-from analysis.opt_run_profast_for_h2_transmission import run_profast_for_h2_transmission
+# from analysis.opt_run_profast_for_h2_transmission import run_profast_for_h2_transmission
 # from analysis.additional_cost_tools import hydrogen_storage_capacity_cost_calcs
 from analysis.additional_cost_tools import hydrogen_storage_capacity_auto_calc_NEW,hydrogen_storage_cost_calc_NEW
-from analysis.electrolyzer_tools import electrolyzer_tools as pem_tool
+# from analysis.electrolyzer_tools import electrolyzer_tools as pem_tool
 # from tools.floris_2_csv import csv_from_floris
-from tools.hydrogen_storage_tools_GS import calc_hydrogen_storage_CapEx,calc_hydrogen_storage_size_kg
+# from tools.hydrogen_storage_tools_GS import calc_hydrogen_storage_CapEx,calc_hydrogen_storage_size_kg
 #from math import cos, asin, sqrt, pi
 warnings.filterwarnings("ignore")
 # import yaml
@@ -73,7 +73,8 @@ class opt_national_sweep:
         
         
         turb_rating_mw = model_params['turbine']['config']['turb_rating_mw']
-        self.wind_scenario = self.init_wind(turb_rating_mw)
+        turb_name = model_params['turbine']['config']['name']
+        self.wind_scenario = self.init_wind(turb_rating_mw,turb_name)
         self.kg_water_pr_kg_H2 = model_params["electrolyzer"]["config"]["kg_H20_pr_kg_H2"]
         self.elec_rated_eff_kWh_pr_kg = self.init_electrolyzer_efficiency() #initializes: self.elec_rated_eff_kWh_pr_kg
         # self.wind_scenario = self.init_wind(turb_rating_mw) #TODO: double check if using bespoke ref turbine
@@ -322,12 +323,12 @@ class opt_national_sweep:
         else:
             hydrogen_storage_size_kg =np.max(fake_soc)- np.min(fake_soc)
         return hydrogen_storage_size_kg
-    def init_wind(self,turb_rating_mw):
+    def init_wind(self,turb_rating_mw,turbine_filename):
         from tools.wind_farm_checker import check_wind
         wind_check = check_wind(self.main_dir,turb_rating_mw)
         #don't need wind_size_mw if using PySAM - only used if running FLORIS
         wind_size_mw = turb_rating_mw #I dont think this is used if using pysam
-        wind_info = wind_check.run(wind_size_mw,self.floris)
+        wind_info = wind_check.run(wind_size_mw,self.floris,turbine_name = turbine_filename)
         wind_filename = wind_info['filename'] #double check
         wind_specs = [wind_info['Hub Height'],turb_rating_mw,\
         wind_filename, wind_info['Rotor Diameter']]
@@ -577,57 +578,57 @@ class opt_national_sweep:
     #     # return pv_capac,wind_lcoh,wind_bat_lcoh,bat_size_mw,bat_size_hrs,pv_h2,pv_bat_h2
 
         
-    def run_optimizer_per_site(self,site_obj,wind_cf,cost_year):
-        #site_obj is created with the SiteInfo function
-        #wind_cf is the decimal of the wind capacity factor
-        #cost year is the year we're running the parametric sweep for
-        hpp=run_hybrid_plant(True,True,False)
-        # losses_comp = 1.1
-        if wind_cf<0.1:
-            wind_cf = 0.3
-        num_turbs_init = np.ceil((self.aep_MWh_reqd_min/(wind_cf*8760))/self.turb_rating_mw)
-        if num_turbs_init>206:
-            num_turbs_init=206
-        wind_init_size_mw = num_turbs_init*self.turb_rating_mw
-        technologies={
-                'wind':{'num_turbines':num_turbs_init,
-                'turbine_rating_kw':self.turb_rating_mw*1000,
-                'hub_height': self.hubht,'rotor_diameter':self.rot_diam},
-                'pv':{'system_capacity_kw':self.solar_init_size_mw*1000}
-                }
-        hybrid_plant=hpp.make_hybrid_plant(technologies,site_obj,self.scenario)
-        init_wind_gen = hpp.get_wind_generation(hybrid_plant)
-        init_solar_gen = hpp.get_solar_generation(hybrid_plant)
-        # hybrid_plant.pv.capacity_factor/100
+    # def run_optimizer_per_site(self,site_obj,wind_cf,cost_year):
+    #     #site_obj is created with the SiteInfo function
+    #     #wind_cf is the decimal of the wind capacity factor
+    #     #cost year is the year we're running the parametric sweep for
+    #     hpp=run_hybrid_plant(True,True,False)
+    #     # losses_comp = 1.1
+    #     if wind_cf<0.1:
+    #         wind_cf = 0.3
+    #     num_turbs_init = np.ceil((self.aep_MWh_reqd_min/(wind_cf*8760))/self.turb_rating_mw)
+    #     if num_turbs_init>206:
+    #         num_turbs_init=206
+    #     wind_init_size_mw = num_turbs_init*self.turb_rating_mw
+    #     technologies={
+    #             'wind':{'num_turbines':num_turbs_init,
+    #             'turbine_rating_kw':self.turb_rating_mw*1000,
+    #             'hub_height': self.hubht,'rotor_diameter':self.rot_diam},
+    #             'pv':{'system_capacity_kw':self.solar_init_size_mw*1000}
+    #             }
+    #     hybrid_plant=hpp.make_hybrid_plant(technologies,site_obj,self.scenario)
+    #     init_wind_gen = hpp.get_wind_generation(hybrid_plant)
+    #     init_solar_gen = hpp.get_solar_generation(hybrid_plant)
+    #     # hybrid_plant.pv.capacity_factor/100
         
-        self.renewable_plant_cost=self.init_renewables_costs(cost_year)
-        # h2_per_mw_wind,h2_per_mw_solar=self.capac_2_h2_grad(init_wind_gen,init_solar_gen,wind_init_size_mw,self.solar_init_size_mw)
-        # wind_capac,lcoh_wind,lcoh_wind_bat,bat_size_mw,bat_size_hrs,wind_h2,wind_bat_h2=\
-        keys = ['Solar Size [MW]','Wind Size [MW]','Bat Size [MW]','Bat Hrs','LCOH','H2']
+    #     self.renewable_plant_cost=self.init_renewables_costs(cost_year)
+    #     # h2_per_mw_wind,h2_per_mw_solar=self.capac_2_h2_grad(init_wind_gen,init_solar_gen,wind_init_size_mw,self.solar_init_size_mw)
+    #     # wind_capac,lcoh_wind,lcoh_wind_bat,bat_size_mw,bat_size_hrs,wind_h2,wind_bat_h2=\
+    #     keys = ['Solar Size [MW]','Wind Size [MW]','Bat Size [MW]','Bat Hrs','LCOH','H2']
 
-        wind_size,pv_size,all_lcoh,all_h2,bat_size_mw,bat_size_hrs=\
-        self.wind_capac_2_lcoh(init_wind_gen,wind_init_size_mw,cost_year,init_solar_gen,self.solar_init_size_mw)
-        w_vals = [pv_size,wind_size,bat_size_mw,bat_size_hrs,all_lcoh,all_h2]
-        df=pd.DataFrame(dict(zip(keys,w_vals)))
-        # wind_mult = wind_capac[np.argmin(lcoh_wind)]/wind_init_size_mw
-        wind_mult = wind_size[np.argmin(all_lcoh)]/wind_init_size_mw
+    #     wind_size,pv_size,all_lcoh,all_h2,bat_size_mw,bat_size_hrs=\
+    #     self.wind_capac_2_lcoh(init_wind_gen,wind_init_size_mw,cost_year,init_solar_gen,self.solar_init_size_mw)
+    #     w_vals = [pv_size,wind_size,bat_size_mw,bat_size_hrs,all_lcoh,all_h2]
+    #     df=pd.DataFrame(dict(zip(keys,w_vals)))
+    #     # wind_mult = wind_capac[np.argmin(lcoh_wind)]/wind_init_size_mw
+    #     wind_mult = wind_size[np.argmin(all_lcoh)]/wind_init_size_mw
         
 
-        # pv_capac,lcoh_pv,lcoh_pv_bat,bat_size_mw_with_pv,bat_size_hrs_with_pv,pv_h2,pv_bat_h2=\
-        wind_size_pv,pv_size_pv,all_lcoh_pv,all_h2_pv,bat_size_mw_pv,bat_size_hrs_pv=\
-        self.solar_capac_2_lcoh(init_solar_gen,self.solar_init_size_mw,cost_year,init_wind_gen*wind_mult,wind_size[np.argmin(all_lcoh)])
+    #     # pv_capac,lcoh_pv,lcoh_pv_bat,bat_size_mw_with_pv,bat_size_hrs_with_pv,pv_h2,pv_bat_h2=\
+    #     wind_size_pv,pv_size_pv,all_lcoh_pv,all_h2_pv,bat_size_mw_pv,bat_size_hrs_pv=\
+    #     self.solar_capac_2_lcoh(init_solar_gen,self.solar_init_size_mw,cost_year,init_wind_gen*wind_mult,wind_size[np.argmin(all_lcoh)])
         
-        # w_keys=['Solar Size [MW]','Wind Size [MW]','LCOH (wind)','H2 (wind)','LCOH (+ bat)','H2 (+bat)','Bat Size [MW]','Bat Hrs']
-        # w_vals = [[self.solar_init_size_mw]*len(wind_capac),wind_capac,lcoh_wind,wind_h2,lcoh_wind_bat,wind_bat_h2,bat_size_mw,bat_size_hrs]
+    #     # w_keys=['Solar Size [MW]','Wind Size [MW]','LCOH (wind)','H2 (wind)','LCOH (+ bat)','H2 (+bat)','Bat Size [MW]','Bat Hrs']
+    #     # w_vals = [[self.solar_init_size_mw]*len(wind_capac),wind_capac,lcoh_wind,wind_h2,lcoh_wind_bat,wind_bat_h2,bat_size_mw,bat_size_hrs]
 
-        # w_pv_keys=['Solar Size [MW]','Wind Size [MW]','LCOH (wind + pv)','H2 (wind + pv)','LCOH (+ bat)','H2 (+bat)','Bat Size [MW]','Bat Hrs']
-        # w_pv_vals = [pv_capac,[wind_capac[np.argmin(lcoh_wind)]]*len(pv_capac),lcoh_pv,pv_h2,lcoh_pv_bat,pv_bat_h2,bat_size_mw_with_pv,bat_size_hrs_with_pv]
-        # wpv_keys = ['Solar Size [MW]','Wind Size [MW]','Bat Size [MW]','Bat Hrs','LCOH','H2']
-        wpv_vals = [pv_size_pv,wind_size_pv,bat_size_mw_pv,bat_size_hrs_pv,all_lcoh_pv,all_h2_pv]
-        df=pd.concat([df,pd.DataFrame(dict(zip(keys,wpv_vals)))])
-        df=df.reset_index(drop=True)
-        return df
-        # pd.DataFrame(dict(zip(wpv_keys,wpv_vals)))
+    #     # w_pv_keys=['Solar Size [MW]','Wind Size [MW]','LCOH (wind + pv)','H2 (wind + pv)','LCOH (+ bat)','H2 (+bat)','Bat Size [MW]','Bat Hrs']
+    #     # w_pv_vals = [pv_capac,[wind_capac[np.argmin(lcoh_wind)]]*len(pv_capac),lcoh_pv,pv_h2,lcoh_pv_bat,pv_bat_h2,bat_size_mw_with_pv,bat_size_hrs_with_pv]
+    #     # wpv_keys = ['Solar Size [MW]','Wind Size [MW]','Bat Size [MW]','Bat Hrs','LCOH','H2']
+    #     wpv_vals = [pv_size_pv,wind_size_pv,bat_size_mw_pv,bat_size_hrs_pv,all_lcoh_pv,all_h2_pv]
+    #     df=pd.concat([df,pd.DataFrame(dict(zip(keys,wpv_vals)))])
+    #     df=df.reset_index(drop=True)
+    #     return df
+    #     # pd.DataFrame(dict(zip(wpv_keys,wpv_vals)))
         
 
         
