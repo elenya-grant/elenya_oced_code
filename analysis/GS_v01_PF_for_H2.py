@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 profast_dir = '' #user must specify!
 sys.path.insert(1,profast_dir)
+
 import ProFAST
 
 # from optimization.gradient_opt_esg import simple_opt
@@ -78,7 +79,7 @@ class LCOH_Calc:
         sol,summary,price_breakdown,lcoh_breakdown =self.get_lcoh2_storage_outputs(pf)
         return sol,summary,price_breakdown,lcoh_breakdown
     
-    def run_lcoh_nostorage(self,pf,component_sizes,elec_avg_consumption_kWhprkg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs):
+    def run_lcoh_nostorage(self,pf,component_sizes,elec_avg_consumption_kWhprkg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,wind_frac):
         # self.policy_info['itc']
         # self.policy_info['h2_ptc']
         # self.policy_info['Ren_PTC_mult']
@@ -109,14 +110,18 @@ class LCOH_Calc:
 
         #add policy
         # pf = self.add_Ren_PTC(ren_energy_usage_kWh_pr_kg,pf)
-        pf = self.add_Ren_PTC(elec_avg_consumption_kWhprkg,pf)
+        if self.use_solar_PTC:
+            pf = self.add_Ren_PTC(elec_avg_consumption_kWhprkg,pf)
+        else:
+            ren_energy_usage_kWh_pr_kg = wind_frac*elec_avg_consumption_kWhprkg
+            pf = self.add_Ren_PTC(ren_energy_usage_kWh_pr_kg,pf)
         h2_ptc = self.policy_info['h2_ptc']
         pf = self.add_H2_PTC(h2_ptc,pf)
 
         sol,summary,price_breakdown,lcoh_breakdown = self.get_outputs_lcoh_nostorage(pf)
 
         return sol,summary,price_breakdown,lcoh_breakdown
-    def run_lcoh_full(self,pf,component_sizes,elec_avg_consumption_kWhprkg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg):
+    def run_lcoh_full(self,pf,component_sizes,elec_avg_consumption_kWhprkg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,wind_frac,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg):
         wind_size_mw = component_sizes["wind_size_mw"]
         solar_size_mw = component_sizes["solar_size_mw"]
         battery_size_mw = component_sizes["battery_size_mw"]
@@ -148,7 +153,14 @@ class LCOH_Calc:
 
         #add policy
         #TODO: fix this!
-        pf = self.add_Ren_PTC(elec_avg_consumption_kWhprkg,pf)
+        if self.use_solar_PTC:
+            #double-dipping, all power to electrolyzer is from wind and solar
+            pf = self.add_Ren_PTC(elec_avg_consumption_kWhprkg,pf)
+        else:
+            #
+            ren_energy_usage_kWh_pr_kg = wind_frac*elec_avg_consumption_kWhprkg
+            pf = self.add_Ren_PTC(ren_energy_usage_kWh_pr_kg,pf)
+            # pf = self.add_Ren_PTC(elec_avg_consumption_kWhprkg,pf)    
         # pf = self.add_Ren_PTC(ren_energy_usage_kWh_pr_kg,pf)
         h2_ptc = self.policy_info['h2_ptc']
         pf = self.add_H2_PTC(h2_ptc,pf)
