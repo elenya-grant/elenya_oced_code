@@ -108,6 +108,7 @@ class opt_national_sweep:
         optimal_sizes = self.run_optimizer(site_obj,model_params,pf_params,pf_tool_opt)
         solar_gen_kWh,wind_gen_kWh = self.run_hopp(site_obj,optimal_sizes["wind_size_mw"],optimal_sizes["solar_size_mw"])
         energy_from_renewables = solar_gen_kWh + wind_gen_kWh
+        wind_frac = np.sum(wind_gen_kWh)/np.sum(energy_from_renewables)
         optimal_sizes["electrolyzer_size_mw"]
         if optimal_sizes["battery_size_mw"]>0:
             electrical_power_input_kWh = self.run_battery(optimal_sizes["electrolyzer_size_mw"],optimal_sizes["battery_size_mw"],optimal_sizes["battery_hrs"],energy_from_renewables)
@@ -146,7 +147,8 @@ class opt_national_sweep:
                     pf_tool= LCOH_Calc(model_params,cost_year,policy_desc,re_cost_desc)
                     #run lcoh breakdown without hydrogen storage
                     sol_h2,summary_h2,price_breakdown_h2,lcoh_breakdown_h2 = \
-                    pf_tool.run_lcoh_nostorage(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs)
+                    pf_tool.run_lcoh_nostorage(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,wind_frac)
+                    # pf_tool.run_lcoh_nostorage(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs)
                     price_breakdown_tracker['{}-{}-{}'.format(re_cost_desc,policy_desc,'no_storage')] = price_breakdown_h2
                     lcoh_h2_tracker.append(sol_h2['price'])
                     lcoh_breakdown_tracker = pd.concat([lcoh_breakdown_tracker,pd.DataFrame(lcoh_breakdown_h2,index = [[re_cost_desc],[policy_desc],['no_storage']])])
@@ -155,7 +157,7 @@ class opt_national_sweep:
                     pf_tool= LCOH_Calc(model_params,cost_year,policy_desc,re_cost_desc)
 
                     sol,summary,price_breakdown,lcoh_breakdown = \
-                    pf_tool.run_lcoh_full(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg)
+                    pf_tool.run_lcoh_full(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,wind_frac,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg)
                     
                     lcoh_full_tracker.append(sol['price'])
                     price_breakdown_tracker['{}-{}-{}'.format(re_cost_desc,policy_desc,storage_type)] = price_breakdown
@@ -425,5 +427,15 @@ class opt_national_sweep:
         # self.elec_rated_eff_kWh_pr_kg = rated_bol_eff
         # pass
         return rated_bol_eff
+    def make_site(self,lat,lon,hub_ht,resource_year = 2013):
+        sample_site = pd.read_pickle(self.main_dir + 'hybrid/sites/sample_site').to_dict()
+        sample_site['lat']=lat
+        sample_site['lon']=lon
+        sample_site['year']= resource_year
+        sample_site['no_wind'] = False
+        sample_site['no_solar'] = False
+        site = SiteInfo(sample_site,resource_dir = self.resource_directory,hub_height=hub_ht)
+
+        return site
 
     
