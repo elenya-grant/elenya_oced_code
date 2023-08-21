@@ -22,13 +22,13 @@ class check_wind:
         # else:
         #     filename,rot_diam,hubht=self.check_for_pysam()
         
-    def run(self,wind_farm_capacity_mw,floris):
+    def run(self,wind_farm_capacity_mw,floris,turbine_name = None):
         if floris:
             #print('using floris')
             output = self.check_for_floris_farm(wind_farm_capacity_mw)
         else:
             #print('using pysam')
-            output =self.check_for_pysam()
+            output =self.check_for_pysam(turbine_name)
         return output
 
 
@@ -69,11 +69,20 @@ class check_wind:
         from floris.utilities import Loader, load_yaml
         floris_config=load_yaml(floris_file)
         return floris_config
-    def check_for_pysam(self):
+    def check_for_pysam(self,turbine_name):
         print("checking for pysam")
-        turbine_name = [turb_file.split('.csv')[0] for turb_file in self.turb_files if '.csv' in turb_file]
-        if len(turbine_name)>0:
-            turbine_name = turbine_name[0]
+        if turbine_name == None:
+            turbine_name = [turb_file.split('.csv')[0] for turb_file in self.turb_files if '.csv' in turb_file]
+            if len(turbine_name)>0:
+                turbine_name = turbine_name[0]
+                csv_filename= self.turb_lib + turbine_name + '.csv'
+                rot_diam,hubht = self.get_turb_specs(turbine_name)
+            else:
+                csv_filename = None
+                rot_diam = None
+                hubht= None
+                print("Can't find CSV file for files that use {} turbine".format(self.turb_files))
+        else:
             csv_filename= self.turb_lib + turbine_name + '.csv'
             rot_diam,hubht = self.get_turb_specs(turbine_name)
             #floris_file_desc = [turb_file.split('.')[0] for turb_file in self.turb_files if '.yaml' in turb_file]
@@ -81,11 +90,7 @@ class check_wind:
             # fl=self.read_floris_turb_file(turbine_name)
             # rot_diam = fl['rotor_diameter']
             # hubht=fl['hub_height']
-        else:
-            csv_filename = None
-            rot_diam = None
-            hubht= None
-            print("Can't find CSV file for files that use {} turbine".format(self.turb_files))
+        
         return {'filename':csv_filename,'Rotor Diameter':rot_diam,'Hub Height':hubht}
         #return csv_filename,rot_diam,hubht
 
