@@ -35,8 +35,8 @@ policy_cases: !include Policy_Defaults.yaml
 # electrolyzer_cost_cases: !include ElectrolyzerCostParameters.yaml
 turbine:
     config:
-        # desc: 'default_6MW'
-        name: 'lbw_6MW'
+        # name: 'lbw_6MW'
+        name: '2023NREL_Bespoke_6MW_196'
         floris: False
         turb_rating_mw: 6 #[MW]
         sim_default_losses: 12.83 #[%]
