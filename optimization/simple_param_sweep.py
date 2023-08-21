@@ -86,7 +86,7 @@ def test_battery(energy_from_renewables,best_Res,constraints,pf_param,pf_tool):
         if max_bat_size_kw > constraints['max_size_MW']['battery']*1000:
             max_bat_size_kw = constraints['max_size_MW']['battery']*1000
         if max_battery_storage_kWh > constraints['ref_size_MWh']['battery']*1000:
-            max_battery_storage_kWh = constraints['ref_size_MWh']*1000
+            max_battery_storage_kWh = constraints['ref_size_MWh']['battery']*1000
         max_bat_hrs = np.nan_to_num(max_battery_storage_kWh/max_bat_size_kw)
         if max_bat_hrs>battery_hour_storage_ub:
             max_bat_hrs = np.copy(battery_hour_storage_ub)
