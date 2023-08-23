@@ -3,9 +3,9 @@ import sys
 #sys.path.insert(1,'../PyFAST/')
 import numpy as np
 import pandas as pd
-profast_dir = '' #user must specify!
+profast_dir = '/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/' #user must specify!
 sys.path.insert(1,profast_dir)
-
+#sys.path.insert(1,'/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/')
 import ProFAST
 
 # from optimization.gradient_opt_esg import simple_opt
@@ -230,9 +230,13 @@ class LCOH_Calc:
         capex_electrolyzer_overnight_pr_kW = direct_capex_pr_kW + indirect_capex_pr_kW
         capex_electrolyzer_overnight = electrolyzer_size_MW * 1000 * capex_electrolyzer_overnight_pr_kW
         
+        capex_compressor_installed = electrolyzer_size_MW * 1000 * self.compressor_capex_pr_kWelec
+
         capex_desal = desal_size_kg_pr_sec*self.desal_CapEx_pr_kgprsec
         pf.add_capital_item(name="Electrolysis system",cost=capex_electrolyzer_overnight,depr_type=self.depreciation_method,depr_period=7,refurb=list(electrolyzer_refurbishment_schedule))
         pf.add_capital_item(name ="Desalination",cost = capex_desal,depr_type=self.depreciation_method,depr_period=7,refurb=[0])
+        pf.add_capital_item(name="Compression",cost=capex_compressor_installed,depr_type=self.depreciation_method,depr_period=7,refurb=[0])
+
         return pf
     def add_ITC_for_hydrogen_storage(self,hydrogen_storage_size_kg,hydrogen_storage_capex_pr_kg,pf,re_itc=0):
         itc_amt = re_itc + (self.policy_info['itc']*(hydrogen_storage_size_kg*hydrogen_storage_capex_pr_kg))
@@ -240,20 +244,20 @@ class LCOH_Calc:
         return pf,itc_amt
     def add_hydrogen_storage_capital_costs(self,electrolyzer_size_MW,hydrogen_storage_size_kg,hydrogen_storage_capex_pr_kg,pf):
         #compression & storage
-        capex_compressor_installed = self.compressor_capex_pr_kWelec*electrolyzer_size_MW*1000
+        # capex_compressor_installed = self.compressor_capex_pr_kWelec*electrolyzer_size_MW*1000
         capex_storage_installed = hydrogen_storage_size_kg*hydrogen_storage_capex_pr_kg
-        pf.add_capital_item(name="Compression",cost=capex_compressor_installed,depr_type=self.depreciation_method,depr_period=7,refurb=[0])
+        # pf.add_capital_item(name="Compression",cost=capex_compressor_installed,depr_type=self.depreciation_method,depr_period=7,refurb=[0])
         pf.add_capital_item(name="Hydrogen Storage",cost=capex_storage_installed,depr_type=self.depreciation_method,depr_period=7,refurb=[0])
         return pf
 
     def add_hydrogen_storage_FOM_costs(self,electrolyzer_size_MW,hydrogen_storage_size_kg,hydrogen_storage_opex_pr_kg,pf):
         #TODO: double check these!
         #compression & storage
-        fixed_cost_compressor = self.compressor_opex_pr_kWelec*electrolyzer_size_MW*1000
+        # fixed_cost_compressor = self.compressor_opex_pr_kWelec*electrolyzer_size_MW*1000
         # fixed_cost_compressor = compressor_opex_pr_kW*electrolyzer_size_MW*1000
         fixed_cost_hydrogen_storage = hydrogen_storage_opex_pr_kg*hydrogen_storage_size_kg
         pf.add_fixed_cost(name="Hydrogen Storage Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_hydrogen_storage,escalation=self.gen_inflation)
-        pf.add_fixed_cost(name="Compression Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_compressor,escalation=self.gen_inflation)
+        # pf.add_fixed_cost(name="Compression Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_compressor,escalation=self.gen_inflation)
         
         return pf
     def add_re_plant_FOM(self,renewable_plant_cost_info,wind_size_mw,solar_size_mw,battery_size_mw,battery_hrs,pf):
@@ -275,8 +279,11 @@ class LCOH_Calc:
     def add_electrolyzer_FOM(self,electrolyzer_size_MW,desal_size_kg_pr_sec,pf):
         fixed_cost_electrolysis_total = self.pem_FOM_pr_kW*electrolyzer_size_MW * 1000
         opex_desal = self.desal_OpEx_pr_kgprsec * desal_size_kg_pr_sec
+        fixed_cost_compressor = self.compressor_opex_pr_kWelec*electrolyzer_size_MW*1000
         pf.add_fixed_cost(name="Electrolyzer Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_electrolysis_total,escalation=self.gen_inflation)
         pf.add_fixed_cost(name="Desalination Fixed O&M Cost",usage=1.0,unit='$/year',cost=opex_desal,escalation=self.gen_inflation)
+        pf.add_fixed_cost(name="Compression Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_compressor,escalation=self.gen_inflation)
+
         #desal + electrolyzer
         return pf
     def add_feedstock_costs(self,annual_hydrogen_kg,elec_avg_consumption_kWhprkg,pf):
@@ -304,7 +311,7 @@ class LCOH_Calc:
                     #   + price_breakdown.loc[price_breakdown['Name']=='Hydrogen Storage','NPV'].tolist()[0]\
         
         capex_fraction = {'Electrolyzer':price_breakdown.loc[price_breakdown['Name']=='Electrolysis system','NPV'].tolist()[0]/total_price_capex,
-                    # 'Compression':price_breakdown.loc[price_breakdown['Name']=='Compression','NPV'].tolist()[0]/total_price_capex,
+                    'Compression':price_breakdown.loc[price_breakdown['Name']=='Compression','NPV'].tolist()[0]/total_price_capex,
                     # 'Hydrogen Storage':price_breakdown.loc[price_breakdown['Name']=='Hydrogen Storage','NPV'].tolist()[0]/total_price_capex,
                     'Desalination':price_breakdown.loc[price_breakdown['Name']=='Desalination','NPV'].tolist()[0]/total_price_capex,
                     'Wind Plant':price_breakdown.loc[price_breakdown['Name']=='Wind Plant','NPV'].tolist()[0]/total_price_capex,
@@ -328,7 +335,7 @@ class LCOH_Calc:
         
         # Calculate LCOH breakdown and assign capital expense to equipment costs
         price_breakdown_electrolyzer = price_breakdown.loc[price_breakdown['Name']=='Electrolysis system','NPV'].tolist()[0] + cap_expense*capex_fraction['Electrolyzer']
-        # price_breakdown_compression = price_breakdown.loc[price_breakdown['Name']=='Compression','NPV'].tolist()[0] + cap_expense*capex_fraction['Compression']
+        price_breakdown_compression = price_breakdown.loc[price_breakdown['Name']=='Compression','NPV'].tolist()[0] + cap_expense*capex_fraction['Compression']
         # price_breakdown_storage = price_breakdown.loc[price_breakdown['Name']=='Hydrogen Storage','NPV'].tolist()[0]+cap_expense*capex_fraction['Hydrogen Storage']
         price_breakdown_desalination = price_breakdown.loc[price_breakdown['Name']=='Desalination','NPV'].tolist()[0] + cap_expense*capex_fraction['Desalination']
         price_breakdown_wind = price_breakdown.loc[price_breakdown['Name']=='Wind Plant','NPV'].tolist()[0] + cap_expense*capex_fraction['Wind Plant']
@@ -341,6 +348,8 @@ class LCOH_Calc:
         price_breakdown_wind_FOM = price_breakdown.loc[price_breakdown['Name']=='Wind Plant Fixed O&M Cost','NPV'].tolist()[0]  
         price_breakdown_solar_FOM = price_breakdown.loc[price_breakdown['Name']=='Solar Plant Fixed O&M Cost','NPV'].tolist()[0]  
         price_breakdown_battery_FOM = price_breakdown.loc[price_breakdown['Name']=='Battery Storage Fixed O&M Cost','NPV'].tolist()[0]  
+        
+        price_breakdown_compressor_FOM = price_breakdown.loc[price_breakdown['Name']=='Compression Fixed O&M Cost','NPV'].tolist()[0]  
         # price_breakdown_h2_transport_FOM = price_breakdown.loc[price_breakdown['Name']=='Hydrogen Transport Fixed O&M Cost','NPV'].tolist()[0] #added
         price_breakdown_taxes = price_breakdown.loc[price_breakdown['Name']=='Income taxes payable','NPV'].tolist()[0]\
             - price_breakdown.loc[price_breakdown['Name'] == 'Monetized tax losses','NPV'].tolist()[0]\
@@ -359,13 +368,15 @@ class LCOH_Calc:
         price_breakdown_renewables=price_breakdown_wind + price_breakdown_solar +price_breakdown_battery
 
         price_breakdown_renewables_FOM = price_breakdown_wind_FOM + price_breakdown_solar_FOM + price_breakdown_battery_FOM
-        lcoh_check = price_breakdown_electrolyzer+price_breakdown_electrolysis_FOM\
+        lcoh_check = price_breakdown_electrolyzer+price_breakdown_electrolysis_FOM + price_breakdown_compression + price_breakdown_compressor_FOM\
             + price_breakdown_desalination+price_breakdown_desalination_FOM+ price_breakdown_electrolysis_VOM\
                 +price_breakdown_renewables+price_breakdown_renewables_FOM+price_breakdown_taxes+price_breakdown_water+price_breakdown_grid_elec_price+remaining_financial\
                     -price_breakdown_ITC
         lcoh_breakdown = {'LCOH: Electrolyzer CAPEX ($/kg)':price_breakdown_electrolyzer,'LCOH: Desalination CAPEX ($/kg)':price_breakdown_desalination,\
+                        'LCOH: Compressor ($/kg)':price_breakdown_compression,\
                         'LCOH: Electrolyzer FOM ($/kg)':price_breakdown_electrolysis_FOM,'LCOH: Electrolyzer VOM ($/kg)':price_breakdown_electrolysis_VOM,\
                         'LCOH: Desalination FOM ($/kg)':price_breakdown_desalination_FOM,\
+                        'LCOH: Compressor FOM ($/kg)':price_breakdown_compressor_FOM,\
                         'LCOH: Wind Plant ($/kg)':price_breakdown_wind,'LCOH: Wind Plant FOM ($/kg)':price_breakdown_wind_FOM,\
                         'LCOH: Solar Plant ($/kg)':price_breakdown_solar,'LCOH: Solar Plant FOM ($/kg)':price_breakdown_solar_FOM,\
                         'LCOH: Battery Storage ($/kg)':price_breakdown_battery,'LCOH: Battery Storage FOM ($/kg)':price_breakdown_battery_FOM,\
