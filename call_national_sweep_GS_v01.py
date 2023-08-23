@@ -96,7 +96,7 @@ for i,si in enumerate(site_idx):
     # site_desc = '{}_Num{}'.format(site_list.iloc[si]['state'].replace(' ',''),site_list.iloc[si].name)
     site_info = {'latitude':site_list.iloc[si]['latitude'],'longitude':site_list.iloc[si]['longitude'],'state':site_list.iloc[si]['state'].replace(' ','')}
     opt.run_site_outline(site_info,config)
-    stop
+    []
     # opt.run_single_site(site_list.iloc[si],result_subdir)
 
 # filename_atb = parent_path + 'input_info/' +'ATB2023_RECosts.yaml'
