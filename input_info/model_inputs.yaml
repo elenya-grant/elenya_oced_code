@@ -1,8 +1,8 @@
 simulation:
     desc: 'GS_PEMP_MVP_v01'
     # cost_year: 2030
-    n_sites: 50535
-    site_list_filename: 'bespoke_sitelist_50535_locations.csv' #'wtk_site_metadata_104k_sites_pemp.csv'
+    n_sites: 49153
+    site_list_filename: 'bespoke_sitelist_49153_locations.csv' #'wtk_site_metadata_104k_sites_pemp.csv'
     policy_cases:
         - 'no_policy' #'no policy'
         - 'max_policy' #'max'
@@ -145,7 +145,7 @@ cost_info:
             water_density_kg_pr_m3: 997 #kg/m^3
             # desal_eff_kWh_pr_m3: 4.2 #kWh/m^3 H2O
 optimization: #these aren't included yet
-    optimization_type: 'simple_param'
+    optimization_type: 'simple_param' #'simple_gradient'
     #other options are 'simple_gradient' and 'pyomo_opt'
     optimziation_policy_cases: 
         - 'no_policy'
