@@ -37,7 +37,8 @@ def clean_up_lifetime_performance(h2_tot,use_degradation_penalty):
          temp_df.index = [[cname],[t_eod_type]]
          redo_performance_df = pd.concat([redo_performance_df,temp_df],axis=0)
    
-   cluster_average_keys = ['Capacity Factor [-]','Average Efficiency [kWh/kg]','Stack Life [hrs]']
+   # cluster_average_keys = ['Capacity Factor [-]','Average Efficiency [kWh/kg]','Stack Life [hrs]']
+   cluster_average_keys = ['Capacity Factor [-]','Average Efficiency [kWh/kg]','Stack Life [hrs]','Time Until Replacement [hrs]']
    cluster_sum_keys = ['Average Annual Hydrogen Produced [kg]']
    cluster_avg_df = pd.DataFrame()
    for t_eod_type in t_eod_metrics:
@@ -85,6 +86,7 @@ def run_h2_PEM(electrical_generation_timeseries, electrolyzer_size,
    h2_res['Life: Capacity Factor [-]']=np.nanmean(h2_tot.loc['Capacity Factor [-]'].values)
    h2_res['Life: Average Efficiency [kWh/kg]'] = np.nanmean(h2_tot.loc['Average Efficiency [kWh/kg]'].values)
    h2_res['Life: Stack Life [hrs]'] = np.nanmean(h2_tot.loc['Stack Life [hrs]'].values)
+   h2_res['Life: Time Until Replacement [hrs]'] = np.nanmean(h2_tot.loc['Time Until Replacement [hrs]'].values)
    h2_res['Life: Average Annual Hydrogen Produced [kg]'] = np.nansum(h2_tot.loc['Average Annual Hydrogen Produced [kg]'])
    return h2_res,h2_ts
    # life_spec_desc = ['Life: ' + s for s in list(cluster_avg_df.index.values)]

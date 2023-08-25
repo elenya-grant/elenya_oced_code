@@ -243,13 +243,14 @@ class PEM_H2_Clusters:
         # return h2_results_aggregates
     def make_lifetime_performance_df_all_opt(self,deg_signal,V_init,power_per_stack):
 
-        t_eod_existance_based_rated,t_eod_operation_based_rated = self.calc_stack_replacement_info(deg_signal)
-        t_eod_existance_based,t_eod_operation_based=self.new_calc_stack_replacement_info(deg_signal,V_init) #new
+        # t_eod_existance_based_rated,t_eod_operation_based_rated = self.calc_stack_replacement_info(deg_signal)
+        time_until_replacement,stack_life = self.calc_stack_replacement_info(deg_signal)
+        # t_eod_existance_based,t_eod_operation_based=self.new_calc_stack_replacement_info(deg_signal,V_init) #new
         life_data_df = {}
         
         # t_eod_opt = [t_eod_operation_based_rated,t_eod_existance_based_rated,t_eod_operation_based,t_eod_existance_based] #mod
         # t_eod_desc = ['Optimistic - Active','Optimistic - Sim','Conservative - Active','Conservative - Sim'] #mod
-        t_eod_opt = [t_eod_existance_based_rated]#,t_eod_existance_based] #mod
+        t_eod_opt = [time_until_replacement]#,t_eod_existance_based] #mod
         t_eod_desc = ['Optimistic - Sim']#,'Conservative - Sim'] #mod
         # self.stack_life_opt = pd.Series(dict(zip(t_eod_desc,t_eod_opt)),name='Stack Life [hrs]')
         
@@ -261,8 +262,10 @@ class PEM_H2_Clusters:
             else:
                 
             # life_data_df[t_eod_desc[i]] = lifetime_performance
+                life_data_df[t_eod_desc[i]] = pd.concat([lifetime_performance,pd.Series([t_eod]*len(lifetime_performance.index),name='Time Until Replacement [hrs]',index = lifetime_performance.index),\
+                pd.Series([stack_life]*len(lifetime_performance.index),name='Stack Life [hrs]',index = lifetime_performance.index)],axis=1)
 
-                life_data_df[t_eod_desc[i]] = pd.concat([lifetime_performance,pd.Series([t_eod]*len(lifetime_performance.index),name='Stack Life [hrs]',index = lifetime_performance.index)],axis=1)
+                # life_data_df[t_eod_desc[i]] = pd.concat([lifetime_performance,pd.Series([t_eod]*len(lifetime_performance.index),name='Stack Life [hrs]',index = lifetime_performance.index)],axis=1)
             
         return pd.Series(life_data_df)
     def find_eol_voltage_curve(self,eol_eff_percent_loss):
@@ -484,6 +487,8 @@ class PEM_H2_Clusters:
         t_eod_operation_based = (1/frac_of_life_used)*operational_time_dt #[hrs]
         #time between replacement [hrs] based on simulation length
         t_eod_existance_based = (1/frac_of_life_used)*sim_time_dt
+        self.frac_of_life_used = frac_of_life_used
+        self.percent_of_sim_operating = operational_time_dt/sim_time_dt
         
         return t_eod_existance_based,t_eod_operation_based
     def new_calc_stack_replacement_info(self,deg_signal,V_cell):
@@ -534,12 +539,12 @@ class PEM_H2_Clusters:
             
             # sim_length = len(power_in_kW)
             #TODO: change it from operational hours life to sim-based life: DONE
-            lifetime_power_kW = np.tile(power_in_kW,int(full_sims_until_dead+1))[0:int(np.ceil(time_between_replacements))]
+            lifetime_power_kW = np.tile(power_in_kW,int(full_sims_until_dead+1))#[0:int(np.ceil(time_between_replacements))]
             I_lifetime_noDeg = calc_current((lifetime_power_kW,self.T_C), *self.curve_coeff)
             V_cell_lifetime = self.cell_design(self.T_C,I_lifetime_noDeg)
-            n_stacks_on_life = np.tile(self.n_stacks_op,int(full_sims_until_dead+1))[0:int(np.ceil(time_between_replacements))]
+            n_stacks_on_life = np.tile(self.n_stacks_op,int(full_sims_until_dead+1))#[0:int(np.ceil(time_between_replacements))]
             h2_lifetime_noDeg_noWarmup = self.h2_production_rate(I_lifetime_noDeg,n_stacks_on_life) #if no start-up
-            h2_warmup_multiplier_lifetime = np.tile(h2_multiplier,int(full_sims_until_dead+1))[0:int(np.ceil(time_between_replacements))]
+            h2_warmup_multiplier_lifetime = np.tile(h2_multiplier,int(full_sims_until_dead+1))#[0:int(np.ceil(time_between_replacements))]
             
             #steady deg
             lifetime_cluster_status = self.system_design(lifetime_power_kW,self.max_stacks)
@@ -556,12 +561,18 @@ class PEM_H2_Clusters:
 
             Vdeg_lifetime = np.cumsum(steady_deg_per_hr_lifetime) + np.cumsum(stack_off_deg_per_hr_lifetime) + V_fatigue_lifetime
             eff_mult_lifetime = (V_cell_lifetime + Vdeg_lifetime)/V_cell_lifetime #(1 + eff drop)
+            
+            V_cell_rated = self.output_dict['BOL Efficiency Curve Info']['Cell Voltage'].values[-1]
+            rated_eff_mult_lifetime = (V_cell_rated + Vdeg_lifetime)/V_cell_rated
+            idx_dead = np.argwhere(rated_eff_mult_lifetime>(1+self.eol_eff_drop))[0][0]
+                
             I_deg_lifetime = I_lifetime_noDeg/eff_mult_lifetime
             h2_prod_lifetime_deg_noWarmup = self.h2_production_rate(I_deg_lifetime,n_stacks_on_life) 
             lifetime_h2_deg_warmup = h2_warmup_multiplier_lifetime*h2_prod_lifetime_deg_noWarmup
 
             _,rated_h2_pr_stack_BOL=self.rated_h2_prod()
-            lifetime_rated_h2_nodeg = rated_h2_pr_stack_BOL*len(lifetime_power_kW)*self.max_stacks
+            # lifetime_rated_h2_nodeg = rated_h2_pr_stack_BOL*len(lifetime_power_kW)*self.max_stacks
+            lifetime_rated_h2_nodeg = rated_h2_pr_stack_BOL*idx_dead*self.max_stacks
             # capfac_noDeg_noWarmup = np.sum(h2_lifetime_noDeg_noWarmup)/lifetime_rated_h2_nodeg
             # capfac_noDeg_withWarmup = np.sum(h2_lifetime_noDeg_noWarmup*h2_warmup_multiplier_lifetime)/lifetime_rated_h2_nodeg
             # capfac_deg_noWarmup = np.sum(h2_prod_lifetime_deg_noWarmup)/lifetime_rated_h2_nodeg
@@ -578,7 +589,10 @@ class PEM_H2_Clusters:
             # case_desc = ['Simulation','Lifetime (no losses)','Lifetime (warmup losses)','Lifetime (deg losses)','Lifetime (full losses)'] 
             
             # lifetime_est_vals = [h2_lifetime_noDeg_noWarmup,h2_lifetime_noDeg_withWarmup,h2_prod_lifetime_deg_noWarmup,lifetime_h2_deg_warmup] #mod
-            lifetime_est_vals = [h2_lifetime_noDeg_withWarmup,lifetime_h2_deg_warmup] 
+            # lifetime_est_vals = [h2_lifetime_noDeg_withWarmup,lifetime_h2_deg_warmup] 
+            # lifetime_est_vals = [h2_lifetime_noDeg_noWarmup[:idx_dead],h2_lifetime_noDeg_withWarmup[:idx_dead],h2_prod_lifetime_deg_noWarmup[:idx_dead],lifetime_h2_deg_warmup[:idx_dead]]
+            lifetime_est_vals = [h2_lifetime_noDeg_withWarmup[:idx_dead],lifetime_h2_deg_warmup[:idx_dead]] 
+            # lifetime_est_vals = [h2_lifetime_noDeg_noWarmup[:idx_dead],h2_lifetime_noDeg_withWarmup[:idx_dead],h2_prod_lifetime_deg_noWarmup[:idx_dead],lifetime_h2_deg_warmup[:idx_dead]]
 
             cf = lambda lifetime_h2,life_h2_capacity : np.sum(lifetime_h2)/life_h2_capacity
             total_h2 = lambda lifetime_h2: np.sum(lifetime_h2)
@@ -587,7 +601,7 @@ class PEM_H2_Clusters:
             cf_vals = [cf(lh2,lifetime_rated_h2_nodeg) for lh2 in lifetime_est_vals]
             # lifetime_h2_vals = [total_h2(lh2) for lh2 in lifetime_est_vals] #mod
             avg_yearly_h2_vals = [avg_annual_h2(lh2) for lh2 in lifetime_est_vals]
-            avg_eff_vals =[avg_eff_kWh_pr_kg(lh2,lifetime_power_kW,n_stacks_on_life) for lh2 in lifetime_est_vals]
+            avg_eff_vals =[avg_eff_kWh_pr_kg(lh2,lifetime_power_kW[:idx_dead],n_stacks_on_life[:idx_dead]) for lh2 in lifetime_est_vals]
             
             # lifetime_performance_df=pd.DataFrame(dict(zip(params,[cf_vals,lifetime_h2_vals,avg_yearly_h2_vals,avg_eff_vals])),index = losses_desc) #mod
             lifetime_performance_df=pd.DataFrame(dict(zip(params,[cf_vals,avg_yearly_h2_vals,avg_eff_vals])),index = losses_desc)
