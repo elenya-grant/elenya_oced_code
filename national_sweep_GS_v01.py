@@ -124,8 +124,9 @@ class opt_national_sweep:
         elec_eff_kWh_pr_kg = H2_res['Life: Average Efficiency [kWh/kg]']
         elec_cf = H2_res['Life: Capacity Factor [-]']
         annual_hydrogen_kg = H2_res['Life: Average Annual Hydrogen Produced [kg]']
-        avg_stack_life_hrs=H2_res['Life: Stack Life [hrs]']
-        
+        # avg_stack_life_hrs=H2_res['Life: Stack Life [hrs]']
+        avg_stack_life_hrs = H2_res['Life: Time Until Replacement [hrs]']
+
         lcoh_breakdown_tracker = pd.DataFrame()
         price_breakdown_tracker = {}
         lcoh_h2_tracker = []
@@ -205,10 +206,13 @@ class opt_national_sweep:
         # lcoh_breakdown_tracker.to_pickle(self.output_dir +'lcoh_results/LCOHBreakdown_' + base_filename + '.csv')
         # pd.Series(price_breakdown_tracker).to_pickle(self.output_dir +'lcoh_results/PriceBreakdown_' + base_filename)
         lcoh_sum_keys = ['Renewables Case','Policy Case','Storage Case','LCOH (no storage)','LCOH (with storage)']
+        
         lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
         # pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals))).to_csv(self.output_dir +'lcoh_results/LCOHCaseSummary_' + base_filename + '.csv')
         all_outputs_to_save ={}
-        all_outputs_to_save['LCOHCaseSummary'] = pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals)))
+        summary_df = pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals)))
+        summary_df.index = [renewable_cost_scenario,policy_scenario,storage_desc]
+        all_outputs_to_save['LCOHCaseSummary'] = summary_df
         all_outputs_to_save['PriceBreakdown'] = pd.Series(price_breakdown_tracker)
         all_outputs_to_save['LCOHBreakdown'] = lcoh_breakdown_tracker
         all_outputs_to_save['Timeseries'] = pd.DataFrame(dict(zip(ts_keys,ts_vals)))
