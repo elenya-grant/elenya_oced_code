@@ -680,13 +680,17 @@ class PEM_H2_Clusters:
             V_fatigue_ts=np.zeros(len(voltage_signal))
             for i in range(len(t_calc)-1):
                 voltage_signal_temp = voltage_signal[np.nonzero(voltage_signal[t_calc[i]:t_calc[i+1]])]
-                v_max=np.max(voltage_signal_temp)
-                v_min=np.min(voltage_signal_temp)
+                
                 if np.size(voltage_signal_temp)==0:
                     rf_sum = 0
-                elif v_max == v_min:
+                else:
+                    v_max=np.max(voltage_signal_temp)
+                    v_min=np.min(voltage_signal_temp)
+
+                if v_max == v_min:
                     rf_sum=0
                 else:
+                    
                     rf_cycles=rainflow.count_cycles(voltage_signal_temp, nbins=10)
                 # rf_cycles=rainflow.count_cycles(voltage_signal[t_calc[i]:t_calc[i+1]], nbins=10)
                     rf_sum=np.sum([pair[0] * pair[1] for pair in rf_cycles])
