@@ -140,6 +140,8 @@ class opt_national_sweep:
             hydrogen_storage_opex_pr_kg=model_params["hydrogen_storage_cases"][storage_type]["opex_per_kg"]
             for re_cost_desc in cost_scenarios:
                 for policy_desc in policy_cases:
+                    # print('{}-{}-{}'.format(storage_type,re_cost_desc,policy_desc))
+
                     storage_desc.append(storage_type)
                     renewable_cost_scenario.append(re_cost_desc)
                     policy_scenario.append(policy_desc)
@@ -188,7 +190,7 @@ class opt_national_sweep:
                     # price_breakdown.loc[price_breakdown['Name']=='Hydrogen Storage']
                     # price_breakdown_h2sto.loc[price_breakdown_h2sto['Name']=='Compression']
                     # price_breakdown_h2sto.loc[price_breakdown_h2sto['Name']=='Hydrogen Storage']
-                    # print('{}-{}-{}'.format(storage_type,re_cost_desc,policy_desc,))
+                    # print('{}-{}-{}'.format(storage_type,re_cost_desc,policy_desc))
                     # print(err)
                     # if err>2.5:
                     #     []
@@ -325,11 +327,12 @@ class opt_national_sweep:
             H2_demand = np.mean(hydrogen_hourly_production)
         diff = hydrogen_hourly_production - H2_demand
         fake_soc = np.cumsum(diff)
-        if np.min(fake_soc)<0:
-            hydrogen_storage_size_kg = np.max(fake_soc) + np.min(fake_soc)
-        else:
-            hydrogen_storage_size_kg =np.max(fake_soc)- np.min(fake_soc)
-        return hydrogen_storage_size_kg
+        # if np.min(fake_soc)<0:
+        #     hydrogen_storage_size_kg = np.max(fake_soc) + np.min(fake_soc)
+        # else:
+        hydrogen_storage_size_kg =np.max(fake_soc)- np.min(fake_soc)
+        
+        return np.abs(hydrogen_storage_size_kg)
     def init_wind(self,turb_rating_mw,turbine_filename):
         from tools.wind_farm_checker import check_wind
         wind_check = check_wind(self.main_dir,turb_rating_mw)
