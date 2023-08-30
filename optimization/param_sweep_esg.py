@@ -257,7 +257,7 @@ def param_sweep(
     # stack_size_MW,
     tr=0.1
 ):
-    print('im here')
+    #print('im here')
     
     x=constraints["ref_size_MW"]["solar"]
     y=constraints["ref_size_MW"]["wind"]
@@ -268,7 +268,7 @@ def param_sweep(
     #     coupled_wind_solar(S_elec_ref,S_solar_ref,S_wind_ref,wind_gen_kWh,solar_gen_kWh,lcoh_tools,return_details=False)
     # [k_xz,k_yz],[x_opt,y_opt],res_tracker,c_kxky_coeff,success_flag = \
     #     coupled_wind_solar(z,x,y,wind_gen_kWh,solar_gen_kWh,lcoh_tools,return_details=False)
-    start= time.perf_counter()
+    # start= time.perf_counter()
     [k_xz,k_yz],res_tracker,c_kxky_coeff,success_flag = \
         coupled_wind_solar(z,x,y,wind_gen_kWh,solar_gen_kWh,lcoh_tools,return_details=True)
     
@@ -303,8 +303,8 @@ def param_sweep(
     # num_electrolyzer_units = np.floor(z_opt/constraints["unit_size_MW"]["electrolyzer"])
     best_res.update({'electrolyzer_size_mw':z_opt})
     
-    end= time.perf_counter()
-    print("Took {} sec to run optimization".format((np.round(end-start,3))))
+    # end= time.perf_counter()
+    # print("Took {} sec to run optimization".format((np.round(end-start,3))))
     
     best_res['wind_size_mw'] = wind_size_mw
     best_res['solar_size_mw'] = solar_size_mw
