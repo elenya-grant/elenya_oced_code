@@ -217,7 +217,7 @@ class opt_national_sweep:
         
         optimal_sizes['Average kg-H2/day'] = H2_res['Life: Average Annual Hydrogen Produced [kg]']*(24/8760)
         optimal_sizes['Curtailed Power [MWh]'] = (np.sum(energy_from_renewables)-np.sum(electrical_power_input_kWh))/1000
-        electrical_power_input_kWh
+        
         # lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
         lcoh_sum_vals = [lcoh_h2_tracker,lcoh_full_tracker]
         # pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals))).to_csv(self.output_dir +'lcoh_results/LCOHCaseSummary_' + base_filename + '.csv')
@@ -232,12 +232,6 @@ class opt_national_sweep:
         all_outputs_to_save['Hybrid_Plant']=pd.concat([pd.Series(dict(hybrid_plant.system_capacity_kw),name='System Capacity [kW]'),
         pd.Series(dict(hybrid_plant.capacity_factors),name='Capacity Factors'),
         pd.Series(dict(hybrid_plant.annual_energies),name='Annual Energy [kWh/year]')],axis=1)
-        
-        
-        
-        
-
-
 
         pd.Series(all_outputs_to_save).to_pickle(self.output_dir + 'lcoh_results/results_summary_' + base_filename)
 
