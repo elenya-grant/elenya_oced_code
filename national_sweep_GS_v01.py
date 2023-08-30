@@ -212,6 +212,12 @@ class opt_national_sweep:
 
         r_corr_coeff = self.calculate_correlation_coeff(wind_gen_kWh,solar_gen_kWh)
         optimal_sizes['correlation_coeff']=r_corr_coeff
+        optimal_sizes['average_h2_kg_pr_hr'] = np.mean(hydrogen_hourly_production)
+        optimal_sizes['max_h2_kg_pr_hr'] = np.max(hydrogen_hourly_production)
+        
+        optimal_sizes['Average kg-H2/day'] = H2_res['Life: Average Annual Hydrogen Produced [kg]']*(24/8760)
+        optimal_sizes['Curtailed Power [MWh]'] = (np.sum(energy_from_renewables)-np.sum(electrical_power_input_kWh))/1000
+        electrical_power_input_kWh
         # lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
         lcoh_sum_vals = [lcoh_h2_tracker,lcoh_full_tracker]
         # pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals))).to_csv(self.output_dir +'lcoh_results/LCOHCaseSummary_' + base_filename + '.csv')
