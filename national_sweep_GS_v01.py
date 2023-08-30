@@ -207,10 +207,13 @@ class opt_national_sweep:
         #save lcoh info
         # lcoh_breakdown_tracker.to_pickle(self.output_dir +'lcoh_results/LCOHBreakdown_' + base_filename + '.csv')
         # pd.Series(price_breakdown_tracker).to_pickle(self.output_dir +'lcoh_results/PriceBreakdown_' + base_filename)
-        lcoh_sum_keys = ['Renewables Case','Policy Case','Storage Case','LCOH (no storage)','LCOH (with storage)']
+        # lcoh_sum_keys = ['Renewables Case','Policy Case','Storage Case','LCOH (no storage)','LCOH (with storage)']
+        lcoh_sum_keys = ['LCOH (no storage)','LCOH (with storage)']
+
         r_corr_coeff = self.calculate_correlation_coeff(wind_gen_kWh,solar_gen_kWh)
         optimal_sizes['correlation_coeff']=r_corr_coeff
-        lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
+        # lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
+        lcoh_sum_vals = [lcoh_h2_tracker,lcoh_full_tracker]
         # pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals))).to_csv(self.output_dir +'lcoh_results/LCOHCaseSummary_' + base_filename + '.csv')
         all_outputs_to_save ={}
         summary_df = pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals)))
