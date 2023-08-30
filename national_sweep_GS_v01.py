@@ -106,7 +106,7 @@ class opt_national_sweep:
         
         # opt_res = self.run_optimizer() #will output optimal wind, solar, battery, and electrolyzer size
         optimal_sizes = self.run_optimizer(site_obj,model_params,pf_params,pf_tool_opt)
-        solar_gen_kWh,wind_gen_kWh = self.run_hopp(site_obj,optimal_sizes["wind_size_mw"],optimal_sizes["solar_size_mw"])
+        solar_gen_kWh,wind_gen_kWh,hybrid_plant = self.run_hopp(site_obj,optimal_sizes["wind_size_mw"],optimal_sizes["solar_size_mw"])
         energy_from_renewables = solar_gen_kWh + wind_gen_kWh
         wind_frac = np.sum(wind_gen_kWh)/np.sum(energy_from_renewables)
         optimal_sizes["electrolyzer_size_mw"]
@@ -208,7 +208,8 @@ class opt_national_sweep:
         # lcoh_breakdown_tracker.to_pickle(self.output_dir +'lcoh_results/LCOHBreakdown_' + base_filename + '.csv')
         # pd.Series(price_breakdown_tracker).to_pickle(self.output_dir +'lcoh_results/PriceBreakdown_' + base_filename)
         lcoh_sum_keys = ['Renewables Case','Policy Case','Storage Case','LCOH (no storage)','LCOH (with storage)']
-        
+        r_corr_coeff = self.calculate_correlation_coeff(wind_gen_kWh,solar_gen_kWh)
+        optimal_sizes['correlation_coeff']=r_corr_coeff
         lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
         # pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals))).to_csv(self.output_dir +'lcoh_results/LCOHCaseSummary_' + base_filename + '.csv')
         all_outputs_to_save ={}
@@ -219,10 +220,25 @@ class opt_national_sweep:
         all_outputs_to_save['LCOHBreakdown'] = lcoh_breakdown_tracker
         all_outputs_to_save['Timeseries'] = pd.DataFrame(dict(zip(ts_keys,ts_vals)))
         all_outputs_to_save['H2Res_Sizes'] = pd.Series(optimal_sizes)
+        all_outputs_to_save['Hybrid_Plant']=pd.concat([pd.Series(dict(hybrid_plant.system_capacity_kw),name='System Capacity [kW]'),
+        pd.Series(dict(hybrid_plant.capacity_factors),name='Capacity Factors'),
+        pd.Series(dict(hybrid_plant.annual_energies),name='Annual Energy [kWh/year]')],axis=1)
+        
+        
+        
+        
+
+
+
         pd.Series(all_outputs_to_save).to_pickle(self.output_dir + 'lcoh_results/results_summary_' + base_filename)
 
         # ['LCOHCaseSummary','PriceBreakdown','LCOHBreakdown']
-
+    def calculate_correlation_coeff(self,wind_gen_kWh,solar_gen_kWh):
+        num = sum((wind_gen_kWh[i]-np.mean(wind_gen_kWh))*(solar_gen_kWh[i]-np.mean(solar_gen_kWh)) for i in range(len(wind_gen_kWh)))
+        x_d = sum(((wind_gen_kWh[i]-np.mean(wind_gen_kWh))**2) for i in range(len(wind_gen_kWh)))
+        y_d = sum(((solar_gen_kWh[i]-np.mean(solar_gen_kWh))**2) for i in range(len(wind_gen_kWh)))
+        r = num/((x_d*y_d)**0.5)
+        return r
     def run_battery(self,electrolyzer_size_mw,battery_size_mw,battery_hrs,energy_from_renewables):
         energy_upper_bound = electrolyzer_size_mw*1000
         energy_lower_bound = energy_upper_bound*0.1
@@ -283,7 +299,7 @@ class opt_national_sweep:
         hybrid_plant=hpp.make_hybrid_plant(technologies,site_obj,self.wind_scenario)
         solar_gen_kWh = hpp.get_solar_generation(hybrid_plant)
         wind_gen_kWh = hpp.get_wind_generation(hybrid_plant)
-        return solar_gen_kWh,wind_gen_kWh
+        return solar_gen_kWh,wind_gen_kWh,hybrid_plant
     def run_optimizer(self,site_obj,model_params,pf_params,pf_tool_opt):
         # from optimization.gradient_opt_esg import simple_opt
         # from optimization.simple_param_sweep import param_sweep as simple_opt
@@ -300,7 +316,7 @@ class opt_national_sweep:
         # from optimization.wrapper_code import run_optimization
         constraints = self.init_constraints(model_params)
         
-        solar_gen_kWh_ref,wind_gen_kWh_ref = self.run_hopp(site_obj,constraints["ref_size_MW"]["wind"],constraints["ref_size_MW"]["solar"])
+        solar_gen_kWh_ref,wind_gen_kWh_ref,hybrid_plant = self.run_hopp(site_obj,constraints["ref_size_MW"]["wind"],constraints["ref_size_MW"]["solar"])
         
         res,all_res = simple_opt(wind_gen_kWh_ref,solar_gen_kWh_ref,constraints,pf_params,pf_tool_opt)
         if self.save_sweep_results: #TODO: finish this!
