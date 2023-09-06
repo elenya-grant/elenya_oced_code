@@ -84,7 +84,9 @@ class opt_national_sweep:
         self.pem_input_dictionary = self.init_electrolyzer_inputs(model_params)
         self.grid_connection_scenario = model_params["plant_general"]["grid_connection_scenario"]
         self.electrolysis_scale = model_params["plant_general"]["electrolysis_scale"]
-    
+
+        self.run_h2_storage_dispatch = model_params['hydrogen_storage']['run_hydrogen_dispatch']
+        self.calc_lcoh_with_h2_storage = model_params['hydrogen_storage']['run_LCOH2Storage']
 
     def run_site_outline(self,site_info,model_params):
 
@@ -92,12 +94,13 @@ class opt_national_sweep:
         cost_scenarios = model_params["simulation"]["cost_scenarios"]
         storage_scenarios = model_params["simulation"]["storage_types"]
         
+        
         pf_params=init_profast(model_params)
         cost_year = model_params["simulation"]['re_cost_year_scenario']
-        policy_desc_opt = 'no_policy'
-        re_cost_desc_opt = 'Moderate'
-        model_params['optimization']['optimization_cost_cases']
-        model_params['optimization']['optimziation_policy_cases']
+        # policy_desc_opt = 'no_policy'
+        # re_cost_desc_opt = 'Moderate'
+        re_cost_desc_opt = model_params['optimization']['optimization_cost_cases']
+        policy_desc_opt = model_params['optimization']['optimziation_policy_cases']
         
         pf_tool_opt= LCOH_Calc(model_params,cost_year,policy_desc_opt,re_cost_desc_opt)
         
@@ -127,6 +130,10 @@ class opt_national_sweep:
         # avg_stack_life_hrs=H2_res['Life: Stack Life [hrs]']
         avg_stack_life_hrs = H2_res['Life: Time Until Replacement [hrs]']
 
+        n_lcoh_calcs = len(policy_cases)*len(cost_scenarios)*len(storage_scenarios)
+        #TODO: initialize stuff as numpy array, add indexer to loop
+        i_lcoh = 0
+
         lcoh_breakdown_tracker = pd.DataFrame()
         price_breakdown_tracker = {}
         lcoh_h2_tracker = []
@@ -155,59 +162,27 @@ class opt_national_sweep:
                     price_breakdown_tracker['{}-{}-{}'.format(re_cost_desc,policy_desc,'no_storage')] = price_breakdown_h2
                     lcoh_h2_tracker.append(sol_h2['price'])
                     lcoh_breakdown_tracker = pd.concat([lcoh_breakdown_tracker,pd.DataFrame(lcoh_breakdown_h2,index = [[re_cost_desc],[policy_desc],['no_storage']])])
+                    if self.calc_lcoh_with_h2_storage:
+                        pf_params=init_profast(model_params)
+                        pf_tool= LCOH_Calc(model_params,cost_year,policy_desc,re_cost_desc)
 
-                    pf_params=init_profast(model_params)
-                    pf_tool= LCOH_Calc(model_params,cost_year,policy_desc,re_cost_desc)
+                        sol,summary,price_breakdown,lcoh_breakdown = \
+                        pf_tool.run_lcoh_full(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,wind_frac,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg)
+                        
+                        lcoh_full_tracker.append(sol['price'])
+                        price_breakdown_tracker['{}-{}-{}'.format(re_cost_desc,policy_desc,storage_type)] = price_breakdown
+                        lcoh_breakdown_tracker = pd.concat([lcoh_breakdown_tracker,pd.DataFrame(lcoh_breakdown,index = [[re_cost_desc],[policy_desc],[storage_type]])])
+                    else:
+                        lcoh_full_tracker.append(sol_h2['price'])
 
-                    sol,summary,price_breakdown,lcoh_breakdown = \
-                    pf_tool.run_lcoh_full(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,wind_frac,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg)
-                    
-                    lcoh_full_tracker.append(sol['price'])
-                    price_breakdown_tracker['{}-{}-{}'.format(re_cost_desc,policy_desc,storage_type)] = price_breakdown
-                    lcoh_breakdown_tracker = pd.concat([lcoh_breakdown_tracker,pd.DataFrame(lcoh_breakdown,index = [[re_cost_desc],[policy_desc],[storage_type]])])
-
-                    # pf_params=init_profast(model_params)
-                    # pf_tool= LCOH_Calc(model_params,cost_year,policy_desc,re_cost_desc)
-
-                    # sol_h2sto,summary_h2sto,price_breakdown_h2sto,lcoh_breakdown_h2sto =\
-                    # pf_tool.run_lcoh2_storage(copy.copy(pf_params),elec_cf,optimal_sizes["electrolyzer_size_mw"],hydrogen_storage_size_kg,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg)
-                    #below is for testing
-                    # optimal_sizes.update({"hydrogen_storage_size_kg":0})
-                    # pf_tool.compressor_capex_pr_kWelec =0
-                    # pf_tool.compressor_opex_pr_kWelec=0
-                    # pf_params=init_profast(model_params)
-                    # pf_tool= LCOH_Calc(model_params,cost_year,policy_desc,re_cost_desc)
-                    # test_sol,test_summary,test_price_breakdown,test_lcoh_breakdown = \
-                    # pf_tool.run_lcoh_full(copy.copy(pf_params),optimal_sizes,elec_eff_kWh_pr_kg,elec_cf,annual_hydrogen_kg,avg_stack_life_hrs,hydrogen_storage_capex_pr_kg,hydrogen_storage_opex_pr_kg)
-                    # pd.Series(dict(zip(summary['Name'],summary['Amount'])))
-                    # price_breakdown
-                    # pd.Series(lcoh_breakdown)
-                    
-                    # # pd.DataFrame(dict(zip(summary['Type'],summary['Amount'])),index = summary['Name'])
-                    # # h2_storage_lcoh = sol['lco']-test_sol['lco']
-                    # # err = sol_h2sto['lco']-h2_storage_lcoh
-                    # price_breakdown.loc[price_breakdown['Name']=='Compression']
-                    # price_breakdown.loc[price_breakdown['Name']=='Hydrogen Storage']
-                    # price_breakdown_h2sto.loc[price_breakdown_h2sto['Name']=='Compression']
-                    # price_breakdown_h2sto.loc[price_breakdown_h2sto['Name']=='Hydrogen Storage']
-                    # print('{}-{}-{}'.format(storage_type,re_cost_desc,policy_desc))
-                    # print(err)
-                    # if err>2.5:
-                    #     []
         #finalize and save
-        base_filename = '{}_{}-{}'.format(site_info['latitude'],site_info['longitude'],site_info['state'])
+        
         optimal_sizes.update(H2_res)
         optimal_sizes.update(site_info)
         optimal_sizes.update({'wind_frac':wind_frac})
         ts_keys = ['Wind [kWh]','Solar [kWh]','Energy From Renewables [kWh]','Energy to Electrolyzer [kWh]','Hydrogen Hourly Production [kg/hour]']
         ts_vals = [wind_gen_kWh,solar_gen_kWh,energy_from_renewables,electrical_power_input_kWh,hydrogen_hourly_production]
-        #save time series
-        # pd.DataFrame(dict(zip(ts_keys,ts_vals))).to_csv(self.output_dir + 'performance/Timeseries_' + base_filename + '.csv')
-        # pd.Series(optimal_sizes).to_csv(self.output_dir + 'performance/Summary_' + base_filename + '.csv')
-        #save lcoh info
-        # lcoh_breakdown_tracker.to_pickle(self.output_dir +'lcoh_results/LCOHBreakdown_' + base_filename + '.csv')
-        # pd.Series(price_breakdown_tracker).to_pickle(self.output_dir +'lcoh_results/PriceBreakdown_' + base_filename)
-        # lcoh_sum_keys = ['Renewables Case','Policy Case','Storage Case','LCOH (no storage)','LCOH (with storage)']
+        
         lcoh_sum_keys = ['LCOH (no storage)','LCOH (with storage)']
 
         r_corr_coeff = self.calculate_correlation_coeff(wind_gen_kWh,solar_gen_kWh)
@@ -218,6 +193,12 @@ class opt_national_sweep:
         optimal_sizes['Average kg-H2/day'] = H2_res['Life: Average Annual Hydrogen Produced [kg]']*(24/8760)
         optimal_sizes['Curtailed Power [MWh]'] = (np.sum(energy_from_renewables)-np.sum(electrical_power_input_kWh))/1000
         
+        if self.run_h2_storage_dispatch:
+            storage_used,excess_h2,storage_SOC = self.run_hydrogen_storage_dispatch(hydrogen_hourly_production,hydrogen_storage_size_kg)
+            ts_keys.extend(['H2 Storage Dispatched [kg]','H2 Storage SOC [kg]','Curtailed H2 [kg]'])
+            ts_vals.extend([storage_used,excess_h2,storage_SOC])
+            optimal_sizes.update({'H2 Storage SOC t=0':storage_SOC[0],'H2 Storage SOC t=8760':storage_SOC[-1],'Max H2 SOC':np.max(storage_SOC)})
+
         # lcoh_sum_vals = [renewable_cost_scenario,policy_scenario,storage_desc,lcoh_h2_tracker,lcoh_full_tracker]
         lcoh_sum_vals = [lcoh_h2_tracker,lcoh_full_tracker]
         # pd.DataFrame(dict(zip(lcoh_sum_keys,lcoh_sum_vals))).to_csv(self.output_dir +'lcoh_results/LCOHCaseSummary_' + base_filename + '.csv')
@@ -233,6 +214,8 @@ class opt_national_sweep:
         pd.Series(dict(hybrid_plant.capacity_factors),name='Capacity Factors'),
         pd.Series(dict(hybrid_plant.annual_energies),name='Annual Energy [kWh/year]')],axis=1)
 
+        #TODO: check if 'state' is a key in site_info
+        base_filename = '{}_{}-{}'.format(site_info['latitude'],site_info['longitude'],site_info['state'])
         pd.Series(all_outputs_to_save).to_pickle(self.output_dir + 'lcoh_results/results_summary_' + base_filename)
 
         # ['LCOHCaseSummary','PriceBreakdown','LCOHBreakdown']
@@ -306,6 +289,7 @@ class opt_national_sweep:
     def run_optimizer(self,site_obj,model_params,pf_params,pf_tool_opt):
         # from optimization.gradient_opt_esg import simple_opt
         # from optimization.simple_param_sweep import param_sweep as simple_opt
+        optimize_electrolyzer = model_params['optimization']['optimize_electrolyzer_capacity']
         if model_params['optimization']['optimization_type'] == 'simple_param':
             # from optimization.param_sweep_esg import param_sweep as simple_opt
             from optimization.simple_param_sweep import param_sweep as simple_opt
@@ -321,7 +305,7 @@ class opt_national_sweep:
         
         solar_gen_kWh_ref,wind_gen_kWh_ref,hybrid_plant = self.run_hopp(site_obj,constraints["ref_size_MW"]["wind"],constraints["ref_size_MW"]["solar"])
         
-        res,all_res = simple_opt(wind_gen_kWh_ref,solar_gen_kWh_ref,constraints,pf_params,pf_tool_opt)
+        res,all_res = simple_opt(wind_gen_kWh_ref,solar_gen_kWh_ref,constraints,pf_params,pf_tool_opt,optimize_electrolyzer,self.save_sweep_results)
         if self.save_sweep_results: #TODO: finish this!
             # pd.Series(all_res).to_pickle(self.output_dir + 'sweep_results/all_sweep_results_{}-{}'.format(site_obj.lat,site_obj.lon))
             all_res.to_csv(self.output_dir + 'sweep_results/all_sweep_results_{}-{}'.format(site_obj.lat,site_obj.lon))
@@ -345,6 +329,7 @@ class opt_national_sweep:
         if H2_demand is None:
             H2_demand = np.mean(hydrogen_hourly_production)
         diff = hydrogen_hourly_production - H2_demand
+        diff = np.insert(diff,0,0)
         fake_soc = np.cumsum(diff)
         # if np.min(fake_soc)<0:
         #     hydrogen_storage_size_kg = np.max(fake_soc) + np.min(fake_soc)
@@ -352,6 +337,25 @@ class opt_national_sweep:
         hydrogen_storage_size_kg =np.max(fake_soc)- np.min(fake_soc)
         
         return np.abs(hydrogen_storage_size_kg)
+    def run_hydrogen_storage_dispatch(self,hydrogen_hourly_production,hydrogen_storage_size_kg,H2_demand = None):
+        from analysis.simple_dispatch import SimpleDispatch
+        bat = SimpleDispatch()
+        if H2_demand is None:
+            H2_demand = np.mean(hydrogen_hourly_production)
+        bat.Nt = len(hydrogen_hourly_production)
+        curtailed_h2 = np.where(hydrogen_hourly_production >H2_demand,hydrogen_hourly_production -H2_demand,0)
+        sf_h2 = np.where(hydrogen_hourly_production<H2_demand,H2_demand - hydrogen_hourly_production,0)
+
+        bat.curtailment = curtailed_h2
+        bat.shortfall = sf_h2
+        bat.battery_storage = hydrogen_storage_size_kg
+        bat.charge_rate = np.max(hydrogen_hourly_production)
+        bat.discharge_rate = np.max(hydrogen_hourly_production)
+        storage_used, excess_h2, storage_SOC = bat.run()
+        
+        return np.array(storage_used),np.array(excess_h2),np.array(storage_SOC)
+
+
     def init_wind(self,turb_rating_mw,turbine_filename):
         from tools.wind_farm_checker import check_wind
         wind_check = check_wind(self.main_dir,turb_rating_mw)
