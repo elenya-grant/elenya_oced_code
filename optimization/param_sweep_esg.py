@@ -250,7 +250,8 @@ def param_sweep(
     constraints,
     pf_param,
     pf_tool,
-    n_sizes_pr_component = 5,
+    optimize_electrolyzer,
+    save_sweep_results,
     # kg_h2o_pr_kg_h2,
     # wind_losses,
     # solar_losses,
@@ -270,15 +271,20 @@ def param_sweep(
     #     coupled_wind_solar(z,x,y,wind_gen_kWh,solar_gen_kWh,lcoh_tools,return_details=False)
     # start= time.perf_counter()
     [k_xz,k_yz],res_tracker,c_kxky_coeff,success_flag = \
-        coupled_wind_solar(z,x,y,wind_gen_kWh,solar_gen_kWh,lcoh_tools,return_details=True)
+        coupled_wind_solar(z,x,y,wind_gen_kWh,solar_gen_kWh,lcoh_tools,return_details=save_sweep_results)
     
 
     best_res = {'battery_size_mw':0,'battery_hrs':0}#new
     
     if not success_flag:
         # best_res = res_tracker.copy()
-        k_xz = res_tracker['solar_size_mw']/z
-        k_yz = res_tracker['wind_size_mw']/z
+        if save_sweep_results:
+            i_min = res_tracker.loc['lcoh'].idxmin()
+            k_xz = res_tracker.loc['solar_size_mw'][i_min]/z
+            k_yz = res_tracker.loc['wind_size_mw'][i_min]/z
+        else:
+            k_xz = res_tracker['solar_size_mw']/z
+            k_yz = res_tracker['wind_size_mw']/z
         # min_lcoh = res_tracker['lcoh']
     min_lcoh = two_params_for_func((k_xz,k_yz),*c_kxky_coeff)
     # else:
@@ -287,8 +293,10 @@ def param_sweep(
     #     y_opt = k_yz*z
     z_max = np.min([constraints["max_size_MW"]["wind"]/k_yz,constraints["max_size_MW"]["solar"]/k_xz])
     kz_max = z_max/z
-    z_opt = electrolyzer_size_opt(z,k_xz,x,solar_gen_kWh,k_yz,y,wind_gen_kWh,lcoh_tools,kz_max,return_details=False)
-    
+    if optimize_electrolyzer:
+        z_opt = electrolyzer_size_opt(z,k_xz,x,solar_gen_kWh,k_yz,y,wind_gen_kWh,lcoh_tools,kz_max,return_details=False)
+    else:
+        z_opt = z
     # best_res['estimated_lcoh'] = min_lcoh
     
     
