@@ -25,7 +25,6 @@ plant_general:
     electrolysis_scale: 'Centralized'
     hydrogen_production_capacity_required_kgphr: 1000 #unused if off-grid
     
-    
 #ATB2023_RECosts.yaml
 #HydrogenStorage_Costs.yaml
 #Policy_Defaults.yaml
@@ -87,6 +86,15 @@ electrolyzer:
         min_nStacks: 1
         max_nStacks: 180 #45 ->should equal 1800 MW
         ref_nStacks: 100 #25 -> should eqal 1 GW
+hydrogen_transmission:
+    run_LCOHT: False
+    before_or_after_storage: 'before'
+    pipeline_distance_km: 50
+
+hydrogen_storage:
+    run_hydrogen_dispatch: False
+    run_LCOH2Storage: True
+    hydrogen_storage_cost_model: 'default_GS'
 finance_parameters:
     land_cost: 250000 #[$]
     general_inflation: 0.0
@@ -146,11 +154,15 @@ cost_info:
             # desal_eff_kWh_pr_m3: 4.2 #kWh/m^3 H2O
 optimization: #these aren't included yet
     optimization_type: 'simple_gradient' #'simple_param' #
+    optimize_electrolyzer_capacity: False
+    optimize_battery_capacity: False
     #other options are 'simple_param', 'simple_gradient' and 'pyomo_opt'
-    optimziation_policy_cases: 
-        - 'no_policy'
-    optimization_cost_cases:
-        - 'Moderate'
+    # optimziation_policy_cases: 
+    #     - 'no_policy'
+    # optimization_cost_cases:
+    #     - 'Moderate'
+    optimziation_policy_cases: 'no_policy'
+    optimization_cost_cases: 'Moderate'
     optimize_for_LCOH_with_Storage: False #not included yet
     storage_type_for_optimization: 'buried_pipes' #only used if storage_type_for_optimization is True
 outputs:
