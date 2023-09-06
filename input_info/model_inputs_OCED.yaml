@@ -1,8 +1,8 @@
 simulation:
     desc: 'OCED_opt_v02'
     # cost_year: 2030
-    n_sites: 79745
-    site_list_filename: '10kSiteList_missingState.csv'
+    n_sites: 79289
+    site_list_filename: '80ksitelist_inState.csv'
     policy_cases:
         - 'no_policy' #'no policy'
         # - 'max_policy' #'max'
