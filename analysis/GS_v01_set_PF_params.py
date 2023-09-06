@@ -5,7 +5,7 @@ import pandas as pd
 import sys
 profast_dir = '' #user must specify!
 sys.path.insert(1,profast_dir)
-
+# sys.path.insert(1,'/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/')
 # from src import ProFAST
 import ProFAST
 def init_profast(config):

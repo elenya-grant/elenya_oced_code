@@ -3,7 +3,8 @@ import sys
 #sys.path.insert(1,'../PyFAST/')
 import numpy as np
 import pandas as pd
-profast_dir = '/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/' #user must specify!
+profast_dir = '' #user must specify!
+# profast_dir = '/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/' #user must specify!
 sys.path.insert(1,profast_dir)
 #sys.path.insert(1,'/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/')
 import ProFAST
@@ -250,12 +251,15 @@ class LCOH_Calc:
         pf.add_capital_item(name="Hydrogen Storage",cost=capex_storage_installed,depr_type=self.depreciation_method,depr_period=7,refurb=[0])
         return pf
 
-    def add_hydrogen_storage_FOM_costs(self,electrolyzer_size_MW,hydrogen_storage_size_kg,hydrogen_storage_opex_pr_kg,pf):
+    def add_hydrogen_storage_FOM_costs(self,hydrogen_storage_capex_pr_kg,hydrogen_storage_size_kg,hydrogen_storage_opex_pr_kg,pf):
         #TODO: double check these!
         #compression & storage
         # fixed_cost_compressor = self.compressor_opex_pr_kWelec*electrolyzer_size_MW*1000
         # fixed_cost_compressor = compressor_opex_pr_kW*electrolyzer_size_MW*1000
         fixed_cost_hydrogen_storage = hydrogen_storage_opex_pr_kg*hydrogen_storage_size_kg
+        #TODO: change to below
+        #hydrogen_storage_opex_perc*(hydrogen_storage_capex_pr_kg*hydrogen_storage_size_kg)
+
         pf.add_fixed_cost(name="Hydrogen Storage Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_hydrogen_storage,escalation=self.gen_inflation)
         # pf.add_fixed_cost(name="Compression Fixed O&M Cost",usage=1.0,unit='$/year',cost=fixed_cost_compressor,escalation=self.gen_inflation)
         
