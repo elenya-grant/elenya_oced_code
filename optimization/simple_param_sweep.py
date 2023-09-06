@@ -134,16 +134,16 @@ def param_sweep(
     constraints,
     pf_param,
     pf_tool,
-    n_sizes_pr_component = 5,
+    optimize_electrolyzer,
+    save_sweep_results,
     # kg_h2o_pr_kg_h2,
     # wind_losses,
     # solar_losses,
     # stack_size_MW,
     tr=0.1
 ):
-
-    num_components = 3
-    n_runs_max = n_sizes_pr_component*num_components
+    #TODO: add in option to optimize electrolyzer size...
+    
     S_wind_min = constraints["min_size_MW"]["wind"]
     S_wind_max = constraints["max_size_MW"]["wind"]
     dS_wind = constraints["unit_size_MW"]["wind"]
@@ -174,8 +174,11 @@ def param_sweep(
     
     most_solar_sizes = [S_solar_ref]*len(wind_sizes) + solar_sizes
     
-    electrolzer_sizes = [S_elec_ref]*len(most_solar_sizes) + ([dS_elec*(np.percentile(S_elec_opt[0:i_eRef],p)//dS_elec) for p in wind_percentiles_ub] +\
-    [dS_elec*(np.percentile(S_elec_opt[i_eRef:],p)//dS_elec) for p in wind_percentiles_lb])
+    if optimize_electrolyzer:
+        electrolzer_sizes = [S_elec_ref]*len(most_solar_sizes) + ([dS_elec*(np.percentile(S_elec_opt[0:i_eRef],p)//dS_elec) for p in wind_percentiles_ub] +\
+        [dS_elec*(np.percentile(S_elec_opt[i_eRef:],p)//dS_elec) for p in wind_percentiles_lb])
+    else:
+        electrolzer_sizes = S_elec_ref*np.ones(len(most_solar_sizes))
     num_clusters = 1
 
     run_desc = 'W: '
@@ -227,7 +230,7 @@ def param_sweep(
         elec_cf = h2_results['Life: Capacity Factor [-]']
         
         annual_h2 = h2_results['Life: Average Annual Hydrogen Produced [kg]']
-        avg_stack_life_hrs=h2_results['Life: Stack Life [hrs]']
+        avg_stack_life_hrs=h2_results['Life: Time Until Replacement [hrs]']#['Life: Stack Life [hrs]']
         cost_info = run_quick_lcoh(elec_eff,elec_cf,annual_h2,avg_stack_life_hrs,component_sizes,copy.copy(pf_param),copy.copy(pf_tool))
 
         # lcoh_tracker[wi] = cost_info[0]
