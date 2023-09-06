@@ -1,0 +1,46 @@
+2035:
+    Advanced:
+        wind:
+            capex_per_kw: 1034 #[$/kW]
+            o&m_per_kw: 22 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 632 #[$/kW]
+            o&m_per_kw: 13 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 155 #[$/kW]
+            capex_per_kwh: 168 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 500
+    Moderate:
+        wind:
+            capex_per_kw: 1093 #[$/kW]
+            o&m_per_kw: 26 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 829 #[$/kW]
+            o&m_per_kw: 16 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 284 #[$/kW]
+            capex_per_kwh: 207 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 500
+    Conservative:
+        wind:
+            capex_per_kw: 1231 #[$/kW]
+            o&m_per_kw: 28 #[$/kW-year]
+            FCR: 0.49 #unused
+        pv:
+            capex_per_kw: 1101 #[$/kW]
+            o&m_per_kw: 19 #[$/kW-year]
+            FCR: 0.44 #unused
+        battery:
+            capex_per_kw: 302 #[$/kW]
+            capex_per_kwh: 285 #[$/kWh]
+            o&m_percent: 0.025
+        electrolyzer:
+            uninstalled_CapEx_pr_kW: 500
