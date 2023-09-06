@@ -2,7 +2,7 @@
 equation_year_CEPCI: 603.1
 model_year_CEPCI: 607.5
 compressor_CapEx_USD_pr_kW: 39
-compressor_OpEx_USD_pr_kW: 0 #TODO - update!
+compressor_OpEx_USD_pr_kW: 0 #from 4% of capex
 
 buried_pipes:
     desc: 'Buried Pipes'
@@ -10,7 +10,7 @@ buried_pipes:
     base_capacity_kg: 103650.973
     base_cost_USD_pr_kg:  521.34
     scaling_factor: 0.9592
-    opex_per_kg: 0 #TODO - update! 84
+    opex_per_kg: 0 #TODO - update! #TODO - update! to percent of capex
 
 salt_cavern:
     desc: 'Salt Cavern'
@@ -18,8 +18,15 @@ salt_cavern:
     base_capacity_kg: 3052261.065689
     base_cost_USD_pr_kg: 17.04
     scaling_factor: 0.611
-    opex_per_kg: 0 #TODO - update!
+    opex_per_kg: 0 #TODO - update! to percent of capex
 
+pressure_vessel:
+    desc: 'Pressure Vessel'
+    base_capacity_MWh_HHV:
+    base_capacity_kg:
+    base_cost_USD_pr_kg:
+    scaling_factor:
+    opex_per_kg:
 #https://www.sciencedirect.com/science/article/pii/S0360319921030834
 #Table 2: buried pipe maintenance cost of 173162 $/year for 500 tonnes of storage capacity
 # -> which is 0.35 $/kg-H2-stored
