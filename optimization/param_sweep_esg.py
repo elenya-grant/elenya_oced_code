@@ -71,8 +71,8 @@ def coupled_wind_solar(S_elec_ref,S_solar_ref,S_wind_ref,wind_gen_kWh,solar_gen_
     desal_size_kg = S_elec_ref*(1000/design_eff)*pf_tool.kg_water_pr_kg_H2/3600
     sizes_d.update({"desal_size_kg_pr_sec":desal_size_kg})
 
-    ky_range =np.array([1/4,1/2,1,3/2,9/4])
-    kx_range =np.array([1/4,1/2,1,3/2,9/4])
+    ky_range =np.array([1/4,1/2,1,3/2,9/4,3])
+    kx_range =np.array([1/4,1/2,1,3/2,9/4,3])
     x0 = S_solar_ref
     y0 = S_wind_ref
     z0 = S_elec_ref
@@ -312,7 +312,6 @@ def param_sweep(
 
     wind_size_mw = num_wind_units*constraints["unit_size_MW"]["wind"]
     solar_size_mw = num_solar_units*constraints["unit_size_MW"]["solar"]
-
 
     # num_electrolyzer_units = np.floor(z_opt/constraints["unit_size_MW"]["electrolyzer"])
     best_res.update({'electrolyzer_size_mw':z_opt})
