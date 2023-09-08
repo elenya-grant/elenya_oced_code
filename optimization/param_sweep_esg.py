@@ -71,8 +71,8 @@ def coupled_wind_solar(S_elec_ref,S_solar_ref,S_wind_ref,wind_gen_kWh,solar_gen_
     desal_size_kg = S_elec_ref*(1000/design_eff)*pf_tool.kg_water_pr_kg_H2/3600
     sizes_d.update({"desal_size_kg_pr_sec":desal_size_kg})
 
-    ky_range =np.array([1/4,1/2,1,3/2,9/4,3])
-    kx_range =np.array([1/4,1/2,1,3/2,9/4,3])
+    ky_range =np.array([1/4,1/2,1,3/2,9/4])
+    kx_range =np.array([1/4,1/2,1,3/2,9/4])
     x0 = S_solar_ref
     y0 = S_wind_ref
     z0 = S_elec_ref
@@ -303,6 +303,12 @@ def param_sweep(
     constraints["max_size_MW"]["wind"]/k_yz
     num_wind_units = np.floor(k_yz*z_opt/constraints["unit_size_MW"]["wind"])
     num_solar_units = np.floor(k_xz*z_opt/constraints["unit_size_MW"]["solar"])
+    if num_wind_units>(constraints["max_size_MW"]["wind"]/constraints["unit_size_MW"]["wind"]):
+        num_wind_units = constraints["max_size_MW"]["wind"]/constraints["unit_size_MW"]["wind"]
+        z_opt = constraints["max_size_MW"]["wind"]/k_yz
+        # solar_size_mw = k_xz*z_opt
+        num_solar_units =np.floor(k_xz*z_opt/constraints["unit_size_MW"]["solar"])
+
 
     wind_size_mw = num_wind_units*constraints["unit_size_MW"]["wind"]
     solar_size_mw = num_solar_units*constraints["unit_size_MW"]["solar"]
