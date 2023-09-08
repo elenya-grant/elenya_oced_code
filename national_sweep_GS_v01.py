@@ -308,7 +308,8 @@ class opt_national_sweep:
         res,all_res = simple_opt(wind_gen_kWh_ref,solar_gen_kWh_ref,constraints,pf_params,pf_tool_opt,optimize_electrolyzer,self.save_sweep_results)
         if self.save_sweep_results: #TODO: finish this!
             # pd.Series(all_res).to_pickle(self.output_dir + 'sweep_results/all_sweep_results_{}-{}'.format(site_obj.lat,site_obj.lon))
-            all_res.to_csv(self.output_dir + 'sweep_results/all_sweep_results_{}-{}'.format(site_obj.lat,site_obj.lon))
+            # all_res.to_csv(self.output_dir + 'sweep_results/all_sweep_results_{}-{}'.format(site_obj.lat,site_obj.lon))
+            all_res.to_pickle(self.output_dir + 'sweep_results/all_sweep_results_{}-{}.pkl'.format(site_obj.lat,site_obj.lon))
         size_idx = [i for i in list(res.index) if ('size' in i) or ('battery' in i)]
         return res[size_idx].to_dict()
         # res = run_optimization(hybrid_plant,constraints,T=8760)
