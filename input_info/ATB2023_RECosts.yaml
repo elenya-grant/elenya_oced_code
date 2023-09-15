@@ -5,8 +5,8 @@
             o&m_per_kw: 24 #[$/kW-year]
             FCR: 0.49 #unused
         pv:
-            capex_per_kw: 917 #[$/kW]
-            o&m_per_kw: 16 #[$/kW-year]
+            capex_per_kw: 684.33 #[$/kW-dc] = 917/1.34
+            o&m_per_kw: 11.94 #[$/kWdc-year] = 16/1.34
             FCR: 0.44 #unused
         battery:
             capex_per_kw: 171 #[$/kW]
@@ -20,8 +20,8 @@
             o&m_per_kw: 27 #[$/kW-year]
             FCR: 0.49 #unused
         pv:
-            capex_per_kw: 1038 #[$/kW]
-            o&m_per_kw: 18 #[$/kW-year]
+            capex_per_kw: 774.63 #[$/kW] 1038/1.34
+            o&m_per_kw: 13.43 #[$/kW-year] 18/1.34
             FCR: 0.44 #unused
         battery:
             capex_per_kw: 294 #[$/kW]
@@ -35,8 +35,8 @@
             o&m_per_kw: 29 #[$/kW-year]
             FCR: 0.49 #unused
         pv:
-            capex_per_kw: 1206 #[$/kW]
-            o&m_per_kw: 20 #[$/kW-year]
+            capex_per_kw: 900 #[$/kW] 1206/1.34
+            o&m_per_kw: 14.93 #[$/kW-year] 20/1.34
             FCR: 0.44 #unused
         battery:
             capex_per_kw: 313 #[$/kW]
@@ -52,8 +52,8 @@
             o&m_per_kw: 23 #[$/kW-year]
             FCR: 0.49 #unused
         pv:
-            capex_per_kw: 860 #[$/kW]
-            o&m_per_kw: 16 #[$/kW-year]
+            capex_per_kw: 641.79 #[$/kW] 860/1.34
+            o&m_per_kw: 11.94 #[$/kW-year] 16/1.34
             FCR: 0.44 #unused
         battery:
             capex_per_kw: 167 #[$/kW]
@@ -67,8 +67,8 @@
             o&m_per_kw: 27 #[$/kW-year]
             FCR: 0.49 #unused
         pv:
-            capex_per_kw: 997 #[$/kW]
-            o&m_per_kw: 17 #[$/kW-year]
+            capex_per_kw: 744.03 #[$/kW] 997/1.34
+            o&m_per_kw: 12.69 #[$/kW-year] 17/1.34
             FCR: 0.44 #unused
         battery:
             capex_per_kw: 292 #[$/kW]
@@ -82,8 +82,8 @@
             o&m_per_kw: 29 #[$/kW-year]
             FCR: 0.49 #unused
         pv:
-            capex_per_kw: 1185 #[$/kW]
-            o&m_per_kw: 20 #[$/kW-year]
+            capex_per_kw: 884.33 #[$/kW] 1185/1.34
+            o&m_per_kw: 14.93 #[$/kW-year] 20/1.34
             FCR: 0.44 #unused
         battery:
             capex_per_kw: 311 #[$/kW]
