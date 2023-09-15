@@ -19,7 +19,7 @@ plant_general:
     resource_year: 2013
     plant_life: 30
     cost_year: 2031 #only 2030 or 2031
-    start_year: 2032
+    start_year: 2033
     installation_months: 36
     grid_connection_scenario: 'off-grid'
     electrolysis_scale: 'Centralized'
@@ -99,16 +99,16 @@ finance_parameters:
     land_cost: 250000 #[$]
     general_inflation: 0.0
     # property_tax_insurance: 0.015 #[% of Cap/y]
-    discount_rate: 0.0824
-    income_tax_rate: 0.27
-    capital_gain_tax_rate: 0.15
-    debt_equity_split: 68.5
+    discount_rate: 0.0967
+    # income_tax_rate: 0.27
+    # capital_gain_tax_rate: 0.15
+    debt_equity_split: 38.2716049382716
     property_tax: 0.01
     property_insurance: 0.005
 
-    total_income_tax_rate: 0.27
+    total_income_tax_rate: 0.2574
     capital_gains_tax_rate: 0.15
-    debt_interest_rate: 0.0489
+    debt_interest_rate: 0.07
 
     sales_tax_rate: 0.0 
     cash_onhand_months: 1
