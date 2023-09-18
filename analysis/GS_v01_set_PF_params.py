@@ -3,12 +3,11 @@ import numpy as np
 import pandas as pd
 
 import sys
-profast_dir = '' #user must specify!
-sys.path.insert(1,profast_dir)
-# sys.path.insert(1,'/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/')
-# from src import ProFAST
-import ProFAST
+
 def init_profast(config):
+    pf_dir = config['simulation']['profast_folder']
+    sys.path.insert(1,pf_dir)
+    import ProFAST
     gen_inflation=config["finance_parameters"]["general_inflation"]
     # config["finance_parameters"][""]
     land_cost=config["finance_parameters"]["land_cost"]

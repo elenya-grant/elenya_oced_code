@@ -3,20 +3,17 @@ import sys
 #sys.path.insert(1,'../PyFAST/')
 import numpy as np
 import pandas as pd
-profast_dir = '' #user must specify!
-# profast_dir = '/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/' #user must specify!
-sys.path.insert(1,profast_dir)
-#sys.path.insert(1,'/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/')
-import ProFAST
+# profast_dir = '' #user must specify!
+# sys.path.insert(1,profast_dir)
+# import ProFAST
 
-# from optimization.gradient_opt_esg import simple_opt
-#from analysis.LCA_single_scenario_ProFAST import hydrogen_LCA_singlescenario_ProFAST
 
-#sys.path.append('../ProFAST/')
-
-pf = ProFAST.ProFAST()
 class LCOH_Calc:
     def __init__(self,config,cost_year,policy_desc,re_cost_desc):
+        pf_dir = config['simulation']['profast_folder']
+        sys.path.insert(1,pf_dir)
+        import ProFAST
+
         self.H2_PTC_duration = config["policy_cases"]["H2_PTC_duration"]
         self.Ren_PTC_duration = config["policy_cases"]["Ren_PTC_duration"]
         
