@@ -52,7 +52,7 @@ filename = parent_path + 'input_info/' + input_file_name
 config = load_yaml(filename)
 run_desc = '{}_'.format(int(config['simulation']['re_cost_year_scenario'])) + config['optimization']['optimization_type']
 
-pf_init = init_profast(config)
+# pf_init = init_profast(config)
 version =config['simulation']['desc']
 num_sites_to_run = config['simulation']['n_sites']
 
@@ -83,7 +83,8 @@ for subsubdir in subsubdirectories:
         os.makedirs(results_main_directory + subsubdir + '/')
 
 opt = opt_national_sweep(config)
-sitelist_filename = parent_path + 'input_info/' + config['simulation']['site_list_filename']
+sitelist_loc = config['simulation']['site_list_folder']
+sitelist_filename = sitelist_loc + config['simulation']['site_list_filename']
 site_list = pd.read_csv(sitelist_filename,index_col='Unnamed: 0')
 if len(site_list)>num_sites_to_run:
     site_step = int(np.round(len(site_list)/num_sites_to_run))
@@ -91,72 +92,9 @@ if len(site_list)>num_sites_to_run:
 else:
     site_idx = np.array(site_list.index.values)
 for i,si in enumerate(site_idx):
-    
     # site_desc = '{}_ID{}'.format(site_list.iloc[si]['state'].replace(' ',''),site_list.iloc[si]['site_id'])
     # site_desc = '{}_Num{}'.format(site_list.iloc[si]['state'].replace(' ',''),site_list.iloc[si].name)
     site_info = {'latitude':site_list.iloc[si]['latitude'],'longitude':site_list.iloc[si]['longitude'],'state':site_list.iloc[si]['state'].replace(' ','')}
     opt.run_site_outline(site_info,config)
     []
     # opt.run_single_site(site_list.iloc[si],result_subdir)
-
-# filename_atb = parent_path + 'input_info/' +'ATB2023_RECosts.yaml'
-# filename_h2 = parent_path + 'input_info/' +'HydrogenStorage_Costs.yaml'
-# filename_policy = parent_path + 'input_info/' +'Policy_Defaults.yaml'
-
-# with open(filename_h2) as fid:
-#     h2_config=yaml.load(fid,yaml.SafeLoader)
-# fid.close()
-
-# with open(filename_policy) as fid:
-#     policy_config=yaml.load(fid,yaml.SafeLoader)
-# fid.close()
-
-# with open(filename_atb) as fid:
-#     atb_config=yaml.load(fid,yaml.SafeLoader)
-# fid.close()
-
-# with open(filename) as fid:
-#     config=yaml.load(fid,yaml.SafeLoader)
-# fid.close()
-# stop
-
-# with open(filename) as fid:
-#     config=yaml.load(fid,yaml.SafeLoader)
-# fid.close()
-# config2=load_yaml(filename)
-# stopp
-# #TODO: check yaml loading
-# # return config
-# # hub_height = 115 #we need 100m and 120m hub-height resource info
-
-
-
-
-# results_main_directory = opt.main_dir + 'results/' + result_subdir + '/'
-# if not os.path.isdir(results_main_directory):
-#     os.makedirs(results_main_directory)
-# for subsubdir in subsubdirectories:
-#     if not os.path.isdir(results_main_directory + subsubdir + '/'):
-#         os.makedirs(results_main_directory + subsubdir + '/')
-
-
-# #initialize site_ID tracker
-# site_id_tracker = np.zeros(len(site_idx))
-
-# #Step 0: pre-initialize set-variables
-# for i,si in enumerate(site_idx):
-#     # lat=site_list.iloc[si]['latitude']
-#     # lon=site_list.iloc[si]['longitude']
-#     # approx_wind_cf = site_list.iloc[si]['capacity_factor']
-#     site_id_tracker[i]=site_list.iloc[si]['site_id']
-#     site_desc = '{}_ID{}'.format(site_list.iloc[si]['State'].replace(' ',''),site_list.iloc[si]['site_id'])
-#     # site_list.iloc[si]
-#     []
-#     opt.run_single_site(site_list.iloc[si],result_subdir)
-#     []
-#     #if running multi-sites
-#     # 
-#     # 
-#     #opt.run_all(site_list.iloc[start_idx:start_idx+step_size],result_subdir)
-#     #start_idx +=step_size
-    
