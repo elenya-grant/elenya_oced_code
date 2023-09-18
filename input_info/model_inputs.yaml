@@ -2,7 +2,9 @@ simulation:
     desc: 'GS_PEMP_MVP_v01'
     # cost_year: 2030
     n_sites: 50082
-    site_list_filename: 'bespoke_sitelist_mod_50082sites.csv' #'wtk_site_metadata_104k_sites_pemp.csv'
+    site_list_folder: '/Users/egrant/Desktop/modular_hopp/elenya_oced_code/input_info/'
+    site_list_filename: 'sitelist_50082locs_detailed.csv' #'bespoke_sitelist_mod_50082sites.csv' #'wtk_site_metadata_104k_sites_pemp.csv'
+    profast_folder: '/Users/egrant/Desktop/HOPP-GIT/HOPP/ProFAST-main/'
     policy_cases:
         - 'no_policy' #'no policy'
         - 'max_policy' #'max'
