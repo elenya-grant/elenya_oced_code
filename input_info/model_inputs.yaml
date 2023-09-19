@@ -104,7 +104,7 @@ finance_parameters:
     discount_rate: 0.0967
     # income_tax_rate: 0.27
     # capital_gain_tax_rate: 0.15
-    debt_equity_split: 38.2716049382716
+    debt_equity_split: 63.63636363636363
     property_tax: 0.01
     property_insurance: 0.005
 
